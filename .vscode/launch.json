@@ -1,0 +1,36 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    // Backend: FastAPI (uvicorn)
+    {
+      "name": "執行後端 (FastAPI Dev)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "fastapi",
+      "args": [
+        "dev",
+        "app/main.py",
+        "--host", "127.0.0.1",
+        "--port", "8000"
+      ],
+      "cwd": "${workspaceFolder}/backend",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/backend"
+      },
+      "console": "integratedTerminal"
+    },
+    // Frontend: Next.js (Node.js)
+    {
+      "name": "執行前端 (Next.js)",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "console": "integratedTerminal"
+    }
+  ]
+}
