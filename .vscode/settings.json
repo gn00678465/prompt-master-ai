@@ -130,5 +130,8 @@
         "source.fixAll.eslint": "explicit",
         "source.organizeImports": "never"
     },
-    "python.analysis.typeCheckingMode": "basic"
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/backend"
+    ]
 }
