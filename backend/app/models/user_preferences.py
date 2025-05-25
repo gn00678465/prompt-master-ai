@@ -2,6 +2,8 @@ from datetime import datetime, timezone
 from sqlmodel import SQLModel, Field
 
 class UserPreferences(SQLModel, table=True):
+    __tablename__:str = "user_preferences"  # 明確指定資料表名稱
+
     preference_id: int | None = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="users.user_id", unique=True)
     default_model: str
