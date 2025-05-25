@@ -1,3 +1,6 @@
 fastapi
 sqlmodel
 alembic
+argon2-cffi
+python-jose[cryptography]
+pydantic-settings
