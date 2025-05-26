@@ -221,10 +221,12 @@ backend/
 用戶登入。
 
 **請求體**：
+```json
+{
+  "username": "string",
+  "password": "string"
+}
 ```
-username=string&password=string
-```
-(application/x-www-form-urlencoded 格式)
 
 **回應（成功）**：
 ```json
@@ -251,6 +253,21 @@ Authorization: Bearer {token}
   "username": "string",
   "email": "string",
   "created_at": "string"
+}
+```
+
+#### `GET /api/auth/logout`
+用戶登出。
+
+**請求頭**：
+```
+Authorization: Bearer {token}
+```
+
+**回應（成功）**：
+```json
+{
+  "data": "string"
 }
 ```
 
