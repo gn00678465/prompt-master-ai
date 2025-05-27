@@ -124,7 +124,7 @@
     "livePreview.autoRefreshPreview": "On Changes to Saved Files",
     // Disable the default formatter, use eslint instead
     "prettier.enable": false,
-    "editor.formatOnSave": false,
+    "editor.formatOnSave": true,
     // Auto fix
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit",
@@ -133,5 +133,6 @@
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.extraPaths": [
         "${workspaceFolder}/backend"
-    ]
+    ],
+    "editor.defaultFormatter": "charliermarsh.ruff"
 }
