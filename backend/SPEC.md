@@ -5,23 +5,28 @@
 ### 2.1 Prompt 智能優化引擎
 
 #### 2.1.1 功能描述
-整合 Google Gemini API，設計並實現 Prompt 優化邏輯。
+整合 Google Gemini API，設計並實現基於模板的 Prompt 優化邏輯。
 
 #### 2.1.2 核心功能
-- 接收原始 Prompt 並應用模板結構
-- 與 Google Gemini API 通信
+- 根據用戶選擇的模板 ID 從資料庫取出模板內容
+- 將模板內容作為系統提示詞 (System Prompt)
+- 將用戶的原始 Prompt 作為用戶輸入與 Gemini API 互動
 - 處理 API 回應並提取優化結果
 - 提供詳細的優化分析
 
-#### 2.1.3 技術實現
-- 設計自定義的 Prompt 處理邏輯
-- 實現不同類型 Prompt 的處理策略
-- 管理 API 密鑰和認證
+#### 2.1.3 優化流程
+1. 接收用戶的原始 Prompt 和選擇的 template_id
+2. 從資料庫查詢對應的模板內容
+3. 構建系統提示詞：使用模板內容作為指導規則
+4. 構建用戶輸入：將原始 Prompt 作為需要優化的內容
+5. 發送請求到 Gemini API
+6. 解析回應並格式化結果
+7. 儲存優化記錄到歷史資料庫
 
 ### 2.2 模板系統
 
 #### 2.2.1 預設模板
-實現至少三個預設優化模板（內容創作、程式碼生成、問題解決），提供不同類型 Prompt 的優化指導。
+實現至少三個預設模板，提供不同程度的 Prompt 的優化指導。
 
 #### 2.2.2 模板管理
 - 提供模板的 CRUD 操作
@@ -32,13 +37,20 @@
 
 #### 2.3.1 用戶管理
 - 實現用戶註冊、登入和認證
-- 使用 JWT 令牌進行身份驗證
+- 使用 JWT 令牌進行身份驗證，包含 JTI (JWT ID) 聲明
 - 安全存儲用戶密碼（使用加密）
+- 實現登出功能，將 Token 加入黑名單
 
 #### 2.3.2 權限控制
 - 限制用戶只能訪問自己的資源
 - 控制模板訪問權限（預設/自定義）
 - 實現 API 訪問控制
+
+#### 2.3.3 Token 管理
+- JWT Token 包含 JTI (JWT ID) 用於唯一識別
+- 登出時將 Token 的 JTI 加入黑名單資料表
+- 每次 API 請求驗證時檢查 Token 是否在黑名單中
+- 定期清理過期的黑名單記錄
 
 ### 2.4 歷史記錄管理
 
@@ -116,6 +128,22 @@ CREATE TABLE user_preferences (
 );
 ```
 
+#### 3.1.5 Token 黑名單表 (token_blacklist)
+```sql
+CREATE TABLE token_blacklist (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_jti TEXT NOT NULL UNIQUE,  -- JWT ID (jti claim)
+    user_id INTEGER,
+    blacklisted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+-- 創建索引以提高查詢效率
+CREATE INDEX idx_token_blacklist_jti ON token_blacklist(token_jti);
+CREATE INDEX idx_token_blacklist_expires ON token_blacklist(expires_at);
+```
+
 ### 3.2 資料庫索引
 - 對 `templates` 表的 `user_id` 和 `is_default` 欄位建立索引
 - 對 `prompt_history` 表的 `user_id` 和 `created_at` 欄位建立索引
@@ -169,17 +197,66 @@ backend/
 
 主要功能：
 - API 認證與設置
-- 請求構建與發送
-- 回應處理與解析
+- 系統提示詞與用戶輸入的請求構建
+- 請求發送與回應處理
 - 錯誤處理與重試
+
+**核心方法**：
+```python
+class GeminiClient:
+    async def optimize_prompt_with_template(
+        self, 
+        template_content: str,  # 模板內容作為系統提示詞
+        user_prompt: str,       # 用戶原始 Prompt
+        model: str = "gemini-pro",
+        temperature: float = 0.7
+    ) -> dict:
+        """
+        使用模板優化 Prompt
+        
+        Args:
+            template_content: 模板內容，用作系統提示詞
+            user_prompt: 用戶的原始 Prompt
+            model: 使用的模型
+            temperature: 溫度參數
+            
+        Returns:
+            包含優化結果和分析的字典
+        """
+        pass
+```
 
 #### 4.2.2 Prompt 優化服務
 實現核心的 Prompt 優化邏輯。
 
 主要功能：
-- 模板應用邏輯
-- Prompt 處理策略
-- 結果分析生成
+- 模板查詢與驗證
+- 權限檢查（確保用戶可以使用該模板）
+- 優化請求處理
+- 結果儲存
+
+**核心方法**：
+```python
+class PromptOptimizationService:
+    async def optimize_prompt(
+        self,
+        user_id: int,
+        original_prompt: str,
+        template_id: int,
+        model: str = "gemini-pro",
+        temperature: float = 0.7
+    ) -> dict:
+        """
+        優化 Prompt 的主要邏輯
+        
+        1. 驗證並獲取模板
+        2. 檢查用戶權限
+        3. 調用 Gemini API
+        4. 儲存歷史記錄
+        5. 返回結果
+        """
+        pass
+```
 
 #### 4.2.3 資料庫存取層
 使用 SQLAlchemy ORM 實現資料庫交互。
@@ -188,6 +265,15 @@ backend/
 - 模型定義
 - CRUD 操作實現
 - 事務管理
+
+#### 4.2.3 Token 管理服務
+管理 JWT Token 的生成、驗證和黑名單機制。
+
+主要功能：
+- Token 生成（包含 JTI）
+- Token 驗證（檢查黑名單）
+- 登出處理（加入黑名單）
+- 定期清理過期記錄
 
 ---
 
@@ -256,8 +342,8 @@ Authorization: Bearer {token}
 }
 ```
 
-#### `GET /api/auth/logout`
-用戶登出。
+#### `POST /api/auth/logout`
+用戶登出，將 Token 加入黑名單。
 
 **請求頭**：
 ```
@@ -267,14 +353,14 @@ Authorization: Bearer {token}
 **回應（成功）**：
 ```json
 {
-  "data": "string"
+  "message": "Successfully logged out"
 }
 ```
 
 ### 5.2 Prompt API
 
 #### `POST /api/prompts/optimize`
-優化 Prompt。
+優化 Prompt。根據選擇的模板作為系統提示詞與 Gemini API 互動。
 
 **請求頭**：
 ```
@@ -285,7 +371,7 @@ Authorization: Bearer {token}
 ```json
 {
   "original_prompt": "string",
-  "template_id": "integer (可選)",
+  "template_id": "integer",
   "model": "string (default: gemini-pro)",
   "temperature": "float (default: 0.7)"
 }
@@ -296,7 +382,11 @@ Authorization: Bearer {token}
 {
   "optimized_prompt": "string",
   "improvement_analysis": "string",
-  "original_prompt": "string"
+  "original_prompt": "string",
+  "template_used": {
+    "template_id": "integer",
+    "name": "string"
+  }
 }
 ```
 
@@ -315,6 +405,10 @@ Authorization: Bearer {token}
     "history_id": "integer",
     "original_prompt": "string",
     "optimized_prompt": "string",
+    "template_used": {
+      "template_id": "integer",
+      "name": "string"
+    },
     "model_used": "string",
     "temperature": "float",
     "created_at": "string"
@@ -325,7 +419,7 @@ Authorization: Bearer {token}
 ### 5.3 模板 API
 
 #### `GET /api/templates`
-獲取模板列表。
+獲取模板列表（包含預設模板和用戶自定義模板）。
 
 **請求頭**：
 ```
@@ -343,15 +437,42 @@ Authorization: Bearer {token}
     "template_id": "integer",
     "name": "string",
     "description": "string",
+    "content": "string",
     "is_default": "boolean",
     "category": "string",
-    "created_at": "string"
+    "created_at": "string",
+    "can_edit": "boolean",
+    "can_delete": "boolean"
   }
 ]
 ```
 
+#### `GET /api/templates/{template_id}`
+獲取特定模板詳情。
+
+**請求頭**：
+```
+Authorization: Bearer {token}
+```
+
+**回應（成功）**：
+```json
+{
+  "template_id": "integer",
+  "name": "string",
+  "description": "string",
+  "content": "string",
+  "is_default": "boolean",
+  "category": "string",
+  "created_at": "string",
+  "updated_at": "string",
+  "can_edit": "boolean",
+  "can_delete": "boolean"
+}
+```
+
 #### `POST /api/templates`
-創建新模板。
+創建新的自定義模板。
 
 **請求頭**：
 ```
@@ -378,6 +499,52 @@ Authorization: Bearer {token}
   "is_default": false,
   "category": "string",
   "created_at": "string"
+}
+```
+
+#### `PUT /api/templates/{template_id}`
+更新自定義模板（只能更新自己的模板）。
+
+**請求頭**：
+```
+Authorization: Bearer {token}
+```
+
+**請求體**：
+```json
+{
+  "name": "string (可選)",
+  "description": "string (可選)",
+  "content": "string (可選)",
+  "category": "string (可選)"
+}
+```
+
+**回應（成功）**：
+```json
+{
+  "template_id": "integer",
+  "name": "string",
+  "description": "string",
+  "content": "string",
+  "is_default": false,
+  "category": "string",
+  "updated_at": "string"
+}
+```
+
+#### `DELETE /api/templates/{template_id}`
+刪除自定義模板（只能刪除自己的模板，預設模板無法刪除）。
+
+**請求頭**：
+```
+Authorization: Bearer {token}
+```
+
+**回應（成功）**：
+```json
+{
+  "message": "Template deleted successfully"
 }
 ```
 
