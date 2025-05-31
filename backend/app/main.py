@@ -1,7 +1,8 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.dependencies import create_db_and_tables
-from app.api import auth_router
+from app.api import auth_router, prompt_router
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -12,6 +13,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(auth_router, prefix="/api",)
+app.include_router(prompt_router, prefix="/api")
+
 
 @app.get("/")
 async def read_root():
