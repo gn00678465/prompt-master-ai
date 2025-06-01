@@ -49,7 +49,13 @@ class GeminiClient:
         """
         return self.client.models.list()
 
-    def generate_content(self, model: str, system_instruction: str, content: str, temperature: float | None = None) -> (str | None):
+    def generate_content(
+            self,
+            model: str | None = None,
+            system_instruction: str | None = None,
+            content: str | None = None,
+            temperature: float | None = None
+    ) -> (str | None):
         """
         生成內容
 
@@ -74,9 +80,11 @@ class GeminiClient:
             Exception: 當 API 請求失敗時
         """
         # 參數驗證
-        if not model:
+        if model is None:
             raise ValueError("模型名稱不能為空")
-        if not content:
+        if system_instruction is None:
+            raise ValueError("系統指令不能為空")
+        if content is None:
             raise ValueError("內容不能為空")
         if temperature is not None and not (0.0 <= temperature <= 2.0):
             raise ValueError("溫度參數必須在 0.0 到 2.0 之間")
