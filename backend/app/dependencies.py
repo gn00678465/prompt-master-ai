@@ -15,20 +15,24 @@ sqlite_url = f"sqlite:///{sqlite_file_name}"
 
 engine = create_engine(sqlite_url, connect_args={"check_same_thread": False})
 
+
 def create_db_and_tables():
     """建立資料庫和資料表"""
     SQLModel.metadata.create_all(engine)
+
 
 def get_session():
     """取得資料庫會話"""
     with Session(engine) as session:
         yield session
 
+
 SessionDep = Annotated[Session, Depends(get_session)]
 
 security = HTTPBearer(
     auto_error=False  # 當沒有提供 token 時不自動拋出錯誤
 )
+
 
 def get_token_header(credentials: HTTPAuthorizationCredentials = Security(security)) -> str:
     """
@@ -43,9 +47,9 @@ def get_token_header(credentials: HTTPAuthorizationCredentials = Security(securi
 
 
 def get_current_user(
-    token: Annotated[str, Depends(get_token_header)], 
+    token: Annotated[str, Depends(get_token_header)],
     session: SessionDep
-):
+) -> (User | None):
     """
     驗證 token 並回傳當前使用者
     """
