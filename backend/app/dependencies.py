@@ -2,13 +2,13 @@
 依賴注入模組
 """
 from typing import Annotated
+
+from app.models import User
+from app.utils import decode_token, is_token_blacklisted
 from fastapi import Depends, HTTPException, Security, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlmodel import Session, create_engine, SQLModel
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import ExpiredSignatureError, JWTError
-from app.utils import decode_token
-from sqlmodel import select
-from app.models.user import User
+from sqlmodel import Session, SQLModel, create_engine, select
 
 sqlite_file_name = "database.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
@@ -60,6 +60,15 @@ def get_current_user(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="無效的認證憑證"
             )
+
+         # 檢查 JTI 是否在黑名單中
+        jti = payload.get("jti")
+        if jti and is_token_blacklisted(jti, session):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token 已失效"
+            )
+
         user_id = payload.get("user_id")
         user = session.exec(
             select(User).where(User.user_id == user_id)

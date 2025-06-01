@@ -6,9 +6,9 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, Body, HTTPException, status
 from sqlmodel import select
 from app.dependencies import get_token_header, SessionDep, get_current_user
-from app.models.user import User
+from app.models import User, TokenBlacklist
 from app.schemas.user import UserCreate, UserOut, UserLogin
-from app.utils import hash_password, verify_password, create_access_token
+from app.utils import hash_password, verify_password, create_access_token, decode_token
 
 router = APIRouter(
     prefix="/v1/auth",
@@ -28,7 +28,7 @@ async def user_register(data: Annotated[UserCreate, Body()], session: SessionDep
     )
     if existing_user.first():
         raise HTTPException(
-            status_code = status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="使用者名稱已存在"
         )
     # 檢查 email 是否已存在
@@ -37,16 +37,16 @@ async def user_register(data: Annotated[UserCreate, Body()], session: SessionDep
     )
     if existing_email.first():
         raise HTTPException(
-            status_code = status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email 已存在"
         )
 
-    new_user = User(        username=data.username,
-        email=data.email,
-        password_hash=hash_password(data.password),  # 密碼應該加密存儲
-        created_at=datetime.now(timezone.utc),
-        last_login=None
-    )
+    new_user = User(username=data.username,
+                    email=data.email,
+                    password_hash=hash_password(data.password),  # 密碼應該加密存儲
+                    created_at=datetime.now(timezone.utc),
+                    last_login=None
+                    )
     session.add(new_user)
     session.commit()
     session.refresh(new_user)
@@ -61,6 +61,7 @@ async def user_register(data: Annotated[UserCreate, Body()], session: SessionDep
         })
     }
 
+
 @router.post("/login", response_model=UserOut)
 async def user_login(data: Annotated[UserLogin, Body()], session: SessionDep):
     """_summary_
@@ -73,15 +74,15 @@ async def user_login(data: Annotated[UserLogin, Body()], session: SessionDep):
     user = existing_user.first()
     if not user:
         raise HTTPException(
-            status_code = status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="使用者名稱不存在或密碼錯誤"
         )
     # 檢查密碼是否正確
     if not verify_password(user.password_hash, data.password):
         raise HTTPException(
-            status_code = status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="使用者名稱不存在或密碼錯誤"
-        )        
+        )
     # 更新最後登入時間
     user.last_login = datetime.now(timezone.utc)
     session.add(user)
@@ -97,6 +98,7 @@ async def user_login(data: Annotated[UserLogin, Body()], session: SessionDep):
         })
     }
 
+
 @router.get("/me", response_model=UserOut)
 async def read_current_user(data: Annotated[str, Depends(get_current_user)]):
     """_summary_
@@ -104,9 +106,39 @@ async def read_current_user(data: Annotated[str, Depends(get_current_user)]):
     """
     return data
 
-@router.get("/logout", dependencies=[Depends(get_token_header)],)
-async def user_logout():
-    """_summary_
-    用戶登出
-    """
-    return {"message": "User logged out"}
+
+@router.post("/logout")
+async def user_logout(
+    token: Annotated[str, Depends(get_token_header)],
+    session: SessionDep,
+    current_user: Annotated[User, Depends(get_current_user)]
+):
+    """用戶登出，將 Token 加入黑名單"""
+    try:
+        payload = decode_token(token)
+        jti = payload.get("jti")
+        exp = payload.get("exp")
+
+        if jti and exp:
+            # 檢查 user_id 是否為 None
+            if current_user.user_id is None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="無效的使用者"
+                )
+
+            # 將 Token 加入黑名單
+            blacklist_entry = TokenBlacklist(
+                token_jti=jti,
+                user_id=current_user.user_id,
+                expires_at=datetime.fromtimestamp(exp, tz=timezone.utc)
+            )
+            session.add(blacklist_entry)
+            session.commit()
+
+        return {"message": "Successfully logged out"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="登出失敗"
+        ) from e

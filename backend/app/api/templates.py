@@ -7,8 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import select, or_, and_
 from schemas.template import TemplateOut, TemplateCreate, TemplateUpdate
 from app.dependencies import SessionDep, get_current_user
-from app.models.user import User
-from app.models.template import Template
+from app.models import User, Template
 
 router = APIRouter(
     prefix="/v1/templates",

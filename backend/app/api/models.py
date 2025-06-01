@@ -3,7 +3,7 @@ API 路由：模型相關操作
 """
 from typing import Annotated, List
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.models.user import User
+from app.models import User
 from app.services.gemini_client import gemini_service
 from app.dependencies import get_current_user
 from app.schemas.model import Model
