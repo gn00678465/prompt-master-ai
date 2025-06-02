@@ -112,23 +112,7 @@ CREATE TABLE prompt_history (
 );
 ```
 
-#### 3.1.4 用戶偏好設定表 (user_preferences)
-```sql
-CREATE TABLE user_preferences (
-    preference_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER UNIQUE,
-    default_model TEXT,
-    default_temperature REAL,
-    default_template_id INTEGER,
-    theme TEXT DEFAULT 'light',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (default_template_id) REFERENCES templates(template_id)
-);
-```
-
-#### 3.1.5 Token 黑名單表 (token_blacklist)
+#### 3.1.4 Token 黑名單表 (token_blacklist)
 ```sql
 CREATE TABLE token_blacklist (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -719,5 +703,5 @@ Authorization: Bearer {token}
 
 - [FastAPI 官方文檔](https://fastapi.tiangolo.com/)
 - [SQLAlchemy 文檔](https://docs.sqlalchemy.org/)
-- [Google Generative AI Python SDK](https://github.com/google/generative-ai-python)
+- [Google Gen AI SDK](https://ai.google.dev/gemini-api/docs/libraries?hl=zh-tw)
 - [JWT 認證](https://jwt.io/)
