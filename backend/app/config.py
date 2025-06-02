@@ -20,7 +20,7 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env")
 
-    @field_validator('secret_key')
+    @field_validator('secret_key', mode="before")
     @classmethod
     def validate_secret_key(cls, v: str) -> str:
         """驗證 SECRET_KEY 是否已設定"""
