@@ -1,12 +1,15 @@
 """
 API 路由：模板管理
 """
+
 from datetime import datetime, timezone
 from typing import List
+
 from fastapi import APIRouter, HTTPException, status
-from sqlmodel import select, or_, and_
-from schemas.template import TemplateOut, TemplateCreate, TemplateUpdate
-from app.dependencies import SessionDep, CurrentUserDep
+from schemas.template import TemplateCreate, TemplateOut, TemplateUpdate
+from sqlmodel import and_, or_, select
+
+from app.dependencies import CurrentUserDep, SessionDep
 from app.models import Template
 
 router = APIRouter(
@@ -16,7 +19,7 @@ router = APIRouter(
 )
 
 
-@router.get('/', response_model=List[TemplateOut])
+@router.get("/", response_model=List[TemplateOut])
 async def get_all_templates(data: CurrentUserDep, session: SessionDep):
     """
     獲取所有模板（包含用戶模板和預設模板）
@@ -24,21 +27,14 @@ async def get_all_templates(data: CurrentUserDep, session: SessionDep):
     user_id = data.user_id
     # 查詢條件：用戶的模板 OR 預設模板
     templates = session.exec(
-        select(Template).where(
-            or_(
-                Template.user_id == user_id,
-                Template.is_default
-            )
-        )
+        select(Template).where(or_(Template.user_id == user_id, Template.is_default))
     ).all()
     return templates
 
 
-@router.get('/{template_id}', response_model=TemplateOut)
+@router.get("/{template_id}", response_model=TemplateOut)
 async def get_template_by_id(
-    data: CurrentUserDep,
-    session: SessionDep,
-    template_id: int
+    data: CurrentUserDep, session: SessionDep, template_id: int
 ):
     """
     根據模板 ID 獲取模板詳細資訊
@@ -49,10 +45,7 @@ async def get_template_by_id(
         select(Template).where(
             and_(
                 Template.template_id == template_id,
-                or_(
-                    Template.user_id == user_id,
-                    Template.is_default
-                )
+                or_(Template.user_id == user_id, Template.is_default),
             )
         )
     ).first()
@@ -60,17 +53,15 @@ async def get_template_by_id(
     if not template:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"模板 ID {template_id} 不存在"
+            detail=f"模板 ID {template_id} 不存在",
         )
 
     return template
 
 
-@router.post('/')
+@router.post("/")
 async def create_template(
-    data: CurrentUserDep,
-    session: SessionDep,
-    template: TemplateCreate
+    data: CurrentUserDep, session: SessionDep, template: TemplateCreate
 ):
     """
     建立新的模板
@@ -80,17 +71,14 @@ async def create_template(
     # 檢查同名模板是否已存在
     existing_template = session.exec(
         select(Template).where(
-            and_(
-                Template.user_id == user_id,
-                Template.name == template.name
-            )
+            and_(Template.user_id == user_id, Template.name == template.name)
         )
     ).first()
 
     if existing_template:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"模板名稱 '{template.name}' 已存在"
+            detail=f"模板名稱 '{template.name}' 已存在",
         )
 
     new_template = Template(
@@ -99,7 +87,7 @@ async def create_template(
         description=template.description,
         content=template.content,
         is_default=False,  # 預設不設為預設模板
-        category=template.category or 'Custom'  # 如果沒有指定分類，預設為 'Custom'
+        category=template.category or "Custom",  # 如果沒有指定分類，預設為 'Custom'
     )
 
     session.add(new_template)
@@ -109,12 +97,12 @@ async def create_template(
     return new_template
 
 
-@router.put('/{template_id}')
+@router.put("/{template_id}")
 async def update_template(
     data: CurrentUserDep,
     session: SessionDep,
     template_id: int,
-    template: TemplateUpdate
+    template: TemplateUpdate,
 ):
     """
     更新模板資訊
@@ -122,17 +110,14 @@ async def update_template(
     user_id = data.user_id
     existing_template = session.exec(
         select(Template).where(
-            and_(
-                Template.template_id == template_id,
-                Template.user_id == user_id
-            )
+            and_(Template.template_id == template_id, Template.user_id == user_id)
         )
     ).first()
 
     if not existing_template:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"模板 ID {template_id} 不存在"
+            detail=f"模板 ID {template_id} 不存在",
         )
 
     # 只更新有傳入的欄位
@@ -151,7 +136,7 @@ async def update_template(
     return existing_template
 
 
-@router.delete('/{template_id}')
+@router.delete("/{template_id}")
 async def delete_template(
     data: CurrentUserDep,
     session: SessionDep,
@@ -163,17 +148,14 @@ async def delete_template(
     user_id = data.user_id
     existing_template = session.exec(
         select(Template).where(
-            and_(
-                Template.template_id == template_id,
-                Template.user_id == user_id
-            )
+            and_(Template.template_id == template_id, Template.user_id == user_id)
         )
     ).first()
 
     if not existing_template:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"模板 ID {template_id} 不存在"
+            detail=f"模板 ID {template_id} 不存在",
         )
 
     session.delete(existing_template)

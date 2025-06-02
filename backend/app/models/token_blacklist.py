@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
-from sqlmodel import SQLModel, Field
+
+from sqlmodel import Field, SQLModel
 
 
 class TokenBlacklist(SQLModel, table=True):
@@ -8,6 +9,5 @@ class TokenBlacklist(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     token_jti: str = Field(unique=True, index=True)
     user_id: int = Field(foreign_key="users.user_id")
-    blacklisted_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc))
+    blacklisted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     expires_at: datetime

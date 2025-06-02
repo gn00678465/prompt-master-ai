@@ -2,7 +2,6 @@
 Google Gemini API 客戶端
 """
 import logging
-from typing import Optional
 from google import genai
 from google.genai import types
 from app.config import settings
@@ -20,7 +19,7 @@ class GeminiClient:
     - 錯誤處理與重試
     """
 
-    def __init__(self, api_key: Optional[str] = None, max_retries: int = 3, retry_delay: float = 1.0):
+    def __init__(self, api_key: str | None = None, max_retries: int = 3, retry_delay: float = 1.0):
         """初始化 Gemini API 客戶端
 
         Args:

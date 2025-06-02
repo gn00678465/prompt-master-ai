@@ -1,12 +1,14 @@
 from datetime import datetime, timezone
-from sqlmodel import SQLModel, Field
+
+from sqlmodel import Field, SQLModel
+
 
 class PromptHistory(SQLModel, table=True):
     """
     PromptHistory 類別，用於儲存提示詞歷史紀錄。
     """
-    
-    __tablename__:str = "prompt_history"
+
+    __tablename__: str = "prompt_history"
 
     history_id: int | None = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="users.user_id")

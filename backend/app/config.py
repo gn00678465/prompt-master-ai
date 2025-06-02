@@ -1,12 +1,14 @@
 """
 應用程式設定模組
 """
+
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     """應用程式設定"""
+
     # JWT 設定
     secret_key: str
     algorithm: str = "HS256"
@@ -20,7 +22,7 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env")
 
-    @field_validator('secret_key', mode="before")
+    @field_validator("secret_key", mode="before")
     @classmethod
     def validate_secret_key(cls, v: str) -> str:
         """驗證 SECRET_KEY 是否已設定"""

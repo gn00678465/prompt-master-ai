@@ -1,9 +1,12 @@
 """
 Prompt 優化服務模組
 """
+
 from typing import Optional
+
 from sqlmodel import Session, select
-from app.models import Template, PromptHistory
+
+from app.models import PromptHistory, Template
 from app.schemas.prompt import PromptOptimizeRequest, PromptOptimizeResponse
 from app.services.gemini_client import GeminiClient
 
@@ -18,9 +21,7 @@ class PromptOptimizerService:
         self.gemini_client = gemini_client
 
     async def optimize_prompt(
-        self,
-        user_id: int,
-        request: PromptOptimizeRequest
+        self, user_id: int, request: PromptOptimizeRequest
     ) -> PromptOptimizeResponse:
         """
         優化 Prompt 的主要邏輯
@@ -50,10 +51,7 @@ class PromptOptimizerService:
 
         # 2. 調用 Gemini API 進行優化
         optimized_result = await self._call_gemini_api(
-            template.content,
-            request.original_prompt,
-            model,
-            temperature
+            template.content, request.original_prompt, model, temperature
         )
 
         # 3. 儲存歷史記錄
@@ -63,14 +61,14 @@ class PromptOptimizerService:
             optimized_prompt=optimized_result["optimized_prompt"],
             template_id=template_id,
             model_used=model,
-            temperature=temperature
+            temperature=temperature,
         )
 
         # 4. 返回結果
         return PromptOptimizeResponse(
             optimized_prompt=optimized_result["optimized_prompt"],
             improvement_analysis=optimized_result["improvement_analysis"],
-            original_prompt=request.original_prompt
+            original_prompt=request.original_prompt,
         )
 
     async def _get_template(self, template_id: Optional[int]) -> Template:
@@ -78,8 +76,7 @@ class PromptOptimizerService:
         if template_id is None:
             raise ValueError("未提供模板")
 
-        statement = select(Template).where(
-            Template.template_id == template_id)
+        statement = select(Template).where(Template.template_id == template_id)
 
         template = self.session.exec(statement).first()
         if not template:
@@ -88,11 +85,7 @@ class PromptOptimizerService:
         return template
 
     async def _call_gemini_api(
-        self,
-        template_content: str,
-        user_prompt: str,
-        model: str,
-        temperature: float
+        self, template_content: str, user_prompt: str, model: str, temperature: float
     ) -> dict:
         """調用 Gemini API"""
         try:
@@ -100,14 +93,14 @@ class PromptOptimizerService:
                 model=model,
                 system_instruction=template_content,
                 content=user_prompt,
-                temperature=temperature
+                temperature=temperature,
             )
 
             # 這裡需要進一步處理 Gemini 回應，提取優化後的 prompt 和分析
             # 暫時簡化處理
             return {
                 "optimized_prompt": optimized_text,
-                "improvement_analysis": "已根據模板進行優化"
+                "improvement_analysis": "已根據模板進行優化",
             }
 
         except Exception as e:
@@ -120,7 +113,7 @@ class PromptOptimizerService:
         optimized_prompt: str,
         template_id: int,
         model_used: str,
-        temperature: float
+        temperature: float,
     ) -> PromptHistory:
         """儲存優化歷史記錄"""
         history = PromptHistory(
@@ -129,7 +122,7 @@ class PromptOptimizerService:
             optimized_prompt=optimized_prompt,
             template_id=template_id,
             model_used=model_used,
-            temperature=temperature
+            temperature=temperature,
         )
 
         self.session.add(history)
