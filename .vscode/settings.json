@@ -125,14 +125,15 @@
     // Disable the default formatter, use eslint instead
     "prettier.enable": false,
     "editor.formatOnSave": true,
-    // Auto fix
-    "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "explicit",
-        "source.organizeImports": "never"
-    },
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.extraPaths": [
         "${workspaceFolder}/backend"
     ],
-    "editor.defaultFormatter": "charliermarsh.ruff"
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.codeActionsOnSave": {
+            "source.fixAll.ruff": "explicit",
+            "source.organizeImports.ruff": "explicit"
+        }
+    },
 }

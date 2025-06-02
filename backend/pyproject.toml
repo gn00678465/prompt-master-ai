@@ -18,3 +18,85 @@ dependencies = [
 dev = [
     "ruff>=0.11.11",
 ]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+indent-width = 4                      # 縮排寬度
+
+# 檔案包含/排除
+include = ["*.py", "*.pyi", "**/pyproject.toml", "*.ipynb"]
+extend-include = ["*.qmd"]            # 額外包含的檔案類型
+exclude = [
+    ".bzr",
+    ".direnv", 
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "migrations",                     # Django migrations
+    "alembic",                        # SQLAlchemy migrations
+]
+
+[tool.ruff.format]
+# 引號樣式
+quote-style = "double"                # "single", "double", "preserve"
+
+# 縮排樣式
+indent-style = "space"                # "tab", "space"
+
+# 跳過魔術尾隨逗號
+skip-magic-trailing-comma = false
+
+# 行結束符
+line-ending = "auto"                  # "auto", "lf", "crlf", "cr"
+
+# 文檔字串程式碼格式化
+docstring-code-format = true
+
+# 文檔字串程式碼行長度
+docstring-code-line-length = "dynamic"  # 數字或 "dynamic"
+
+[tool.ruff.lint.isort]
+# import 區塊分組
+force-single-line = false
+force-sort-within-sections = true
+combine-as-imports = true
+
+# 已知的第一方和第三方套件
+known-first-party = ["app", "src"]
+known-third-party = ["fastapi", "pydantic", "sqlalchemy"]
+
+# 區塊順序
+section-order = [
+    "future",
+    "standard-library", 
+    "third-party",
+    "first-party",
+    "local-folder"
+]
+
+# 相對 import 偏好
+relative-imports-order = "closest-to-furthest"
+
+# 額外的標準庫模組
+extra-standard-library = ["tomllib"]
+
+# 強制換行的 import
+force-wrap-aliases = true
+split-on-trailing-comma = true
