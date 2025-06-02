@@ -6,11 +6,11 @@ from datetime import datetime, timezone
 from typing import List
 
 from fastapi import APIRouter, HTTPException, status
-from schemas.template import TemplateCreate, TemplateOut, TemplateUpdate
 from sqlmodel import and_, or_, select
 
 from app.dependencies import CurrentUserDep, SessionDep
 from app.models import Template
+from app.schemas.template import TemplateCreate, TemplateOut, TemplateUpdate
 
 router = APIRouter(
     prefix="/v1/templates",
