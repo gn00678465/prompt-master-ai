@@ -5,7 +5,7 @@ from typing import Annotated
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, Body, HTTPException, status
 from sqlmodel import select
-from app.dependencies import get_token_header, SessionDep, get_current_user
+from app.dependencies import get_token_header, SessionDep, CurrentUserDep
 from app.models import User, TokenBlacklist
 from app.schemas.user import UserCreate, UserOut, UserLogin
 from app.utils import hash_password, verify_password, create_access_token, decode_token
@@ -100,7 +100,7 @@ async def user_login(data: Annotated[UserLogin, Body()], session: SessionDep):
 
 
 @router.get("/me", response_model=UserOut)
-async def read_current_user(data: Annotated[str, Depends(get_current_user)]):
+async def read_current_user(data: CurrentUserDep):
     """_summary_
     獲取當前用戶信息
     """
@@ -111,7 +111,7 @@ async def read_current_user(data: Annotated[str, Depends(get_current_user)]):
 async def user_logout(
     token: Annotated[str, Depends(get_token_header)],
     session: SessionDep,
-    current_user: Annotated[User, Depends(get_current_user)]
+    current_user: CurrentUserDep
 ):
     """用戶登出，將 Token 加入黑名單"""
     try:

@@ -1,11 +1,10 @@
 """
 API 路由：模型相關操作
 """
-from typing import Annotated, List
-from fastapi import APIRouter, Depends, HTTPException, status
-from app.models import User
+from typing import List
+from fastapi import APIRouter, HTTPException, status
 from app.services.gemini_client import gemini_service
-from app.dependencies import get_current_user
+from app.dependencies import CurrentUserDep
 from app.schemas.model import Model
 
 router = APIRouter(
@@ -17,7 +16,7 @@ router = APIRouter(
 
 @router.get('/models')
 async def get_available_models(
-    _: Annotated[User, Depends(get_current_user)]
+    _: CurrentUserDep
 ) -> List[Model]:
     """
     獲取可用的模型列表

@@ -5,16 +5,17 @@ from typing import Annotated
 
 from app.models import User
 from app.utils import decode_token, is_token_blacklisted
+from app.config import settings
+
 from fastapi import Depends, HTTPException, Security, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import ExpiredSignatureError, JWTError
 from sqlmodel import Session, SQLModel, create_engine, select
 
-sqlite_file_name = "database.db"
-sqlite_url = f"sqlite:///{sqlite_file_name}"
-
-engine = create_engine(sqlite_url, connect_args={"check_same_thread": False})
-
+engine = create_engine(
+    settings.database_url,
+    connect_args={"check_same_thread": False}
+)
 
 def create_db_and_tables():
     """建立資料庫和資料表"""
@@ -84,3 +85,5 @@ def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="無效的認證憑證"
         ) from e
+
+CurrentUserDep = Annotated[User, Depends(get_current_user)]

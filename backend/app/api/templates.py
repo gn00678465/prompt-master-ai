@@ -2,12 +2,12 @@
 API 路由：模板管理
 """
 from datetime import datetime, timezone
-from typing import Annotated, List
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List
+from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select, or_, and_
 from schemas.template import TemplateOut, TemplateCreate, TemplateUpdate
-from app.dependencies import SessionDep, get_current_user
-from app.models import User, Template
+from app.dependencies import SessionDep, CurrentUserDep
+from app.models import Template
 
 router = APIRouter(
     prefix="/v1/templates",
@@ -17,7 +17,7 @@ router = APIRouter(
 
 
 @router.get('/', response_model=List[TemplateOut])
-async def get_all_templates(data: Annotated[User, Depends(get_current_user)], session: SessionDep):
+async def get_all_templates(data: CurrentUserDep, session: SessionDep):
     """
     獲取所有模板（包含用戶模板和預設模板）
     """
@@ -36,7 +36,7 @@ async def get_all_templates(data: Annotated[User, Depends(get_current_user)], se
 
 @router.get('/{template_id}', response_model=TemplateOut)
 async def get_template_by_id(
-    data: Annotated[User, Depends(get_current_user)],
+    data: CurrentUserDep,
     session: SessionDep,
     template_id: int
 ):
@@ -68,7 +68,7 @@ async def get_template_by_id(
 
 @router.post('/')
 async def create_template(
-    data: Annotated[User, Depends(get_current_user)],
+    data: CurrentUserDep,
     session: SessionDep,
     template: TemplateCreate
 ):
@@ -111,7 +111,7 @@ async def create_template(
 
 @router.put('/{template_id}')
 async def update_template(
-    data: Annotated[User, Depends(get_current_user)],
+    data: CurrentUserDep,
     session: SessionDep,
     template_id: int,
     template: TemplateUpdate
@@ -153,7 +153,7 @@ async def update_template(
 
 @router.delete('/{template_id}')
 async def delete_template(
-    data: Annotated[User, Depends(get_current_user)],
+    data: CurrentUserDep,
     session: SessionDep,
     template_id: int,
 ):

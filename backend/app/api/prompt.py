@@ -1,11 +1,11 @@
 """
 Prompt 相關 API 端點
 """
-from typing import Annotated, List
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List
+from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select, desc
-from app.dependencies import SessionDep, get_current_user
-from app.models import User, PromptHistory
+from app.dependencies import SessionDep, CurrentUserDep
+from app.models import PromptHistory
 from app.schemas.prompt import PromptOptimizeRequest, PromptOptimizeResponse, PromptHistoryOut
 from app.services.prompt_optimizer import PromptOptimizerService
 from app.services.gemini_client import gemini_service
@@ -21,7 +21,7 @@ router = APIRouter(
 async def optimize_prompt(
     request: PromptOptimizeRequest,
     session: SessionDep,
-    current_user: Annotated[User, Depends(get_current_user)]
+    current_user: CurrentUserDep
 ):
     """
     優化 Prompt
@@ -62,7 +62,7 @@ async def optimize_prompt(
 @router.get("/history", response_model=List[PromptHistoryOut])
 async def get_prompt_history(
     session: SessionDep,
-    current_user: Annotated[User, Depends(get_current_user)]
+    current_user: CurrentUserDep
 ):
     """
     獲取用戶的 Prompt 歷史記錄
