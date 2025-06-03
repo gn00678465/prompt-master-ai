@@ -19,6 +19,7 @@ class TemplateOut(BaseModel):
     description: str | None
     is_default: bool
     category: str | None
+    content: str
     created_at: datetime
 
 

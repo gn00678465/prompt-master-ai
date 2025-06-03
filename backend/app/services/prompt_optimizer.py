@@ -2,8 +2,6 @@
 Prompt 優化服務模組
 """
 
-from typing import Optional
-
 from sqlmodel import Session, select
 
 from app.models import PromptHistory, Template
@@ -51,7 +49,11 @@ class PromptOptimizerService:
 
         # 2. 調用 Gemini API 進行優化
         optimized_result = await self._call_gemini_api(
-            template.content, request.original_prompt, model, temperature
+            template.content,
+            request.original_prompt,
+            model,
+            temperature,
+            max_output_tokens=request.max_output_tokens,
         )
 
         # 3. 儲存歷史記錄
@@ -71,7 +73,7 @@ class PromptOptimizerService:
             original_prompt=request.original_prompt,
         )
 
-    async def _get_template(self, template_id: Optional[int]) -> Template:
+    async def _get_template(self, template_id: int | None) -> Template:
         """獲取模板"""
         if template_id is None:
             raise ValueError("未提供模板")
@@ -85,7 +87,12 @@ class PromptOptimizerService:
         return template
 
     async def _call_gemini_api(
-        self, template_content: str, user_prompt: str, model: str, temperature: float
+        self,
+        template_content: str,
+        user_prompt: str,
+        model: str,
+        temperature: float,
+        max_output_tokens: int | None = None,
     ) -> dict:
         """調用 Gemini API"""
         try:
@@ -94,6 +101,7 @@ class PromptOptimizerService:
                 system_instruction=template_content,
                 content=user_prompt,
                 temperature=temperature,
+                max_output_tokens=max_output_tokens,
             )
 
             # 這裡需要進一步處理 Gemini 回應，提取優化後的 prompt 和分析

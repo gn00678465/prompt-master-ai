@@ -4,7 +4,6 @@
 """
 
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -16,9 +15,10 @@ class PromptOptimizeRequest(BaseModel):
     """
 
     original_prompt: str
-    template_id: int | None = None
-    model: Optional[str] = "gemini-pro"
-    temperature: float | None = 0.7
+    template_id: int
+    model: str
+    temperature: float | None = 0.2
+    max_output_tokens: int | None = None
 
 
 class PromptOptimizeResponse(BaseModel):
