@@ -95,6 +95,9 @@ class GeminiClient:
         temperature = (
             temperature if temperature is not None else self.default_temperature
         )
+        # 驗證 temperature 範圍
+        if not 0.0 <= temperature <= 2.0:
+            raise ValueError(f"temperature 必須在 0 到 2 之間，目前值：{temperature}")
         max_output_tokens = (
             max_output_tokens
             if max_output_tokens is not None
