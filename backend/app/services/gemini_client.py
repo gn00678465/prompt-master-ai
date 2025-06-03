@@ -1,9 +1,12 @@
 """
 Google Gemini API 客戶端
 """
+
 import logging
+
 from google import genai
 from google.genai import types
+
 from app.config import settings
 
 logger = logging.getLogger(__name__)
@@ -19,18 +22,20 @@ class GeminiClient:
     - 錯誤處理與重試
     """
 
-    def __init__(self, api_key: str | None = None, max_retries: int = 3, retry_delay: float = 1.0):
+    def __init__(
+        self,
+        api_key: str | None = None,
+    ):
         """初始化 Gemini API 客戶端
 
         Args:
             api_key: API 密鑰，如果未提供則從設定中讀取
-            max_retries: 最大重試次數
             retry_delay: 重試延遲時間（秒）
         """
         self.api_key = api_key
-        self.max_retries = max_retries
-        self.retry_delay = retry_delay
         self._client = None
+        self.default_temperature = 0.2
+        self.default_max_output_tokens = 2048
 
         if not self.api_key:
             raise ValueError("GEMINI_API_KEY environment variable is not set.")
@@ -49,12 +54,13 @@ class GeminiClient:
         return self.client.models.list()
 
     def generate_content(
-            self,
-            model: str | None = None,
-            system_instruction: str | None = None,
-            content: str | None = None,
-            temperature: float | None = None
-    ) -> (str | None):
+        self,
+        model: str | None = None,
+        system_instruction: str | None = None,
+        content: str | None = None,
+        temperature: float | None = None,
+        max_output_tokens: int | None = None,
+    ) -> str | None:
         """
         生成內容
 
@@ -63,6 +69,7 @@ class GeminiClient:
             system_instruction: 系統指令
             content: 使用者輸入內容
             temperature: 溫度參數（控制創造性），範圍 0.0-2.0
+            max_output_tokens: 最大輸出令牌數量
 
         Returns:
             包含生成結果的字典，格式：
@@ -85,23 +92,28 @@ class GeminiClient:
             raise ValueError("系統指令不能為空")
         if content is None:
             raise ValueError("內容不能為空")
-        if temperature is not None and not (0.0 <= temperature <= 2.0):
-            raise ValueError("溫度參數必須在 0.0 到 2.0 之間")
+        temperature = (
+            temperature if temperature is not None else self.default_temperature
+        )
+        max_output_tokens = (
+            max_output_tokens
+            if max_output_tokens is not None
+            else self.default_max_output_tokens
+        )
 
         # 建構請求資料
         request_data = {
             "model": model,
             "config": types.GenerateContentConfig(
-                system_instruction=system_instruction,
-                temperature=temperature
+                system_instruction=system_instruction, temperature=temperature
             ),
-            "contents": content
+            "contents": content,
         }
 
         return self.client.models.generate_content(
-            model=request_data['model'],
-            contents=request_data['contents'],
-            config=request_data['config']
+            model=request_data["model"],
+            contents=request_data["contents"],
+            config=request_data["config"],
         ).text
 
     def health_check(self) -> bool:
