@@ -2,6 +2,8 @@
 依賴注入模組
 """
 
+from pathlib import Path
+import subprocess
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, Security, status
@@ -16,9 +18,51 @@ from app.utils import decode_token, is_token_blacklisted
 engine = create_engine(settings.database_url, connect_args={"check_same_thread": False})
 
 
+def run_alembic_migration():
+    """執行 Alembic 資料庫遷移"""
+    try:
+        # 取得專案根目錄
+        backend_dir = Path(__file__).parent.parent
+
+        print("🔄 檢查資料庫遷移狀態...")
+
+        # 執行 alembic upgrade head
+        # 明確指定編碼為 utf-8，避免 Windows CP950 編碼問題
+        result = subprocess.run(
+            ["alembic", "upgrade", "head"],
+            cwd=backend_dir,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",  # 遇到無法解碼的字符時用替代字符替換
+            check=True,
+        )
+
+        if result.stdout.strip():
+            print("✅ 資料庫遷移完成:")
+            print(result.stdout)
+        else:
+            print("✅ 資料庫已是最新版本")
+
+    except subprocess.CalledProcessError as e:
+        print("❌ 資料庫遷移失敗:")
+        print(e.stderr)
+        print("⚠️  繼續使用 SQLModel.metadata.create_all() 建立資料表")
+        # 如果遷移失敗，回退到原本的建立方式
+        SQLModel.metadata.create_all(engine)
+    except FileNotFoundError:
+        print("⚠️  找不到 alembic 指令，使用 SQLModel.metadata.create_all() 建立資料表")
+        SQLModel.metadata.create_all(engine)
+    except Exception as e:
+        print(f"⚠️  遷移過程發生錯誤: {e}")
+        print("⚠️  使用 SQLModel.metadata.create_all() 建立資料表")
+        SQLModel.metadata.create_all(engine)
+
+
 def create_db_and_tables():
     """建立資料庫和資料表"""
-    SQLModel.metadata.create_all(engine)
+    # 嘗試執行 Alembic 遷移，如果失敗則使用原本方式
+    run_alembic_migration()
 
 
 def get_session():
