@@ -1,1 +1,11 @@
 fastapi
+sqlmodel
+alembic
+argon2-cffi
+python-jose[cryptography]
+pydantic-settings
+google-genai
+pytest
+pytest-asyncio
+httpx
+pytest-mock
