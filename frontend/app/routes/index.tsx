@@ -1,6 +1,7 @@
 import * as fs from 'node:fs'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
+import { Button } from '@/components/ui/button'
 
 const filePath = 'count.txt'
 
@@ -33,7 +34,7 @@ function Home() {
   const state = Route.useLoaderData()
 
   return (
-    <button
+    <Button
       type="button"
       onClick={() => {
         updateCount({ data: 1 }).then(() => {
@@ -45,6 +46,6 @@ function Home() {
       {' '}
       {state}
       ?
-    </button>
+    </Button>
   )
 }
