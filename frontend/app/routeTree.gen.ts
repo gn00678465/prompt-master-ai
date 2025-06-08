@@ -13,6 +13,7 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
 import { Route as TemplatesIndexImport } from './routes/templates/index'
+import { Route as PromptIndexImport } from './routes/prompt/index'
 import { Route as HistoryIndexImport } from './routes/history/index'
 
 // Create/Update Routes
@@ -26,6 +27,12 @@ const IndexRoute = IndexImport.update({
 const TemplatesIndexRoute = TemplatesIndexImport.update({
   id: '/templates/',
   path: '/templates/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const PromptIndexRoute = PromptIndexImport.update({
+  id: '/prompt/',
+  path: '/prompt/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -53,6 +60,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HistoryIndexImport
       parentRoute: typeof rootRoute
     }
+    '/prompt/': {
+      id: '/prompt/'
+      path: '/prompt'
+      fullPath: '/prompt'
+      preLoaderRoute: typeof PromptIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/templates/': {
       id: '/templates/'
       path: '/templates'
@@ -68,12 +82,14 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/history': typeof HistoryIndexRoute
+  '/prompt': typeof PromptIndexRoute
   '/templates': typeof TemplatesIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/history': typeof HistoryIndexRoute
+  '/prompt': typeof PromptIndexRoute
   '/templates': typeof TemplatesIndexRoute
 }
 
@@ -81,27 +97,30 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/history/': typeof HistoryIndexRoute
+  '/prompt/': typeof PromptIndexRoute
   '/templates/': typeof TemplatesIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/history' | '/templates'
+  fullPaths: '/' | '/history' | '/prompt' | '/templates'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/history' | '/templates'
-  id: '__root__' | '/' | '/history/' | '/templates/'
+  to: '/' | '/history' | '/prompt' | '/templates'
+  id: '__root__' | '/' | '/history/' | '/prompt/' | '/templates/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HistoryIndexRoute: typeof HistoryIndexRoute
+  PromptIndexRoute: typeof PromptIndexRoute
   TemplatesIndexRoute: typeof TemplatesIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HistoryIndexRoute: HistoryIndexRoute,
+  PromptIndexRoute: PromptIndexRoute,
   TemplatesIndexRoute: TemplatesIndexRoute,
 }
 
@@ -117,6 +136,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/history/",
+        "/prompt/",
         "/templates/"
       ]
     },
@@ -125,6 +145,9 @@ export const routeTree = rootRoute
     },
     "/history/": {
       "filePath": "history/index.tsx"
+    },
+    "/prompt/": {
+      "filePath": "prompt/index.tsx"
     },
     "/templates/": {
       "filePath": "templates/index.tsx"
