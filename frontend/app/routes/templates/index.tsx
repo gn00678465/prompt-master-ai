@@ -1,28 +1,26 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Input } from "@/components/ui/input"
-import { ArrowLeft, Edit, Plus, Search, Trash2, Settings } from "lucide-react"
-import { TemplateForm } from "@/components/template-form"
-import { Badge } from "@/components/ui/badge"
+import { ArrowLeft, Edit, Plus, Search, Settings, Trash2 } from 'lucide-react'
+import { useState } from 'react'
+import { TemplateForm } from '@/components/template-form'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export const Route = createFileRoute('/templates/')({
   component: TemplatesPage,
 })
 
-
-
 // 預設模板資料
 const defaultTemplates = [
-  { id: 1, name: "預設模板", description: "通用優化模板", isDefault: true, category: "general" },
-  { id: 2, name: "普通模板", description: "基本優化模板", isDefault: true, category: "general" },
-  { id: 3, name: "擴展模板", description: "詳細優化模板", isDefault: true, category: "general" },
-  { id: 4, name: "內容創作模板", description: "適用於文章、故事等創作", isDefault: true, category: "content" },
-  { id: 5, name: "程式碼生成模板", description: "適用於程式碼生成", isDefault: true, category: "code" },
-  { id: 6, name: "問題解決模板", description: "適用於問題分析和解決", isDefault: true, category: "problem" },
+  { id: 1, name: '預設模板', description: '通用優化模板', isDefault: true, category: 'general' },
+  { id: 2, name: '普通模板', description: '基本優化模板', isDefault: true, category: 'general' },
+  { id: 3, name: '擴展模板', description: '詳細優化模板', isDefault: true, category: 'general' },
+  { id: 4, name: '內容創作模板', description: '適用於文章、故事等創作', isDefault: true, category: 'content' },
+  { id: 5, name: '程式碼生成模板', description: '適用於程式碼生成', isDefault: true, category: 'code' },
+  { id: 6, name: '問題解決模板', description: '適用於問題分析和解決', isDefault: true, category: 'problem' },
 ]
 
 function TemplatesPage() {
@@ -30,25 +28,25 @@ function TemplatesPage() {
   const [isNewTemplateDialogOpen, setIsNewTemplateDialogOpen] = useState(false)
   const [isEditTemplateDialogOpen, setIsEditTemplateDialogOpen] = useState(false)
   const [editingTemplate, setEditingTemplate] = useState(null)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [activeCategory, setActiveCategory] = useState("all")
+  const [searchQuery, setSearchQuery] = useState('')
+  const [activeCategory, setActiveCategory] = useState('all')
 
   // 獲取所有唯一的類別
-  const categories = ["all", ...new Set(templates.map((t) => t.category))]
+  const categories = ['all', ...new Set(templates.map(t => t.category))]
 
   // 過濾模板
   const filteredTemplates = templates.filter((template) => {
-    const matchesSearch =
-      template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      template.description.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = activeCategory === "all" || template.category === activeCategory
+    const matchesSearch
+      = template.name.toLowerCase().includes(searchQuery.toLowerCase())
+      || template.description.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesCategory = activeCategory === 'all' || template.category === activeCategory
 
     return matchesSearch && matchesCategory
   })
 
   // 分類模板
-  const defaultFilteredTemplates = filteredTemplates.filter((t) => t.isDefault)
-  const customFilteredTemplates = filteredTemplates.filter((t) => !t.isDefault)
+  const defaultFilteredTemplates = filteredTemplates.filter(t => t.isDefault)
+  const customFilteredTemplates = filteredTemplates.filter(t => !t.isDefault)
 
   // 新增自定義模板
   const addCustomTemplate = (template) => {
@@ -66,7 +64,7 @@ function TemplatesPage() {
 
   // 刪除模板
   const deleteTemplate = (id) => {
-    setTemplates(templates.filter((template) => template.id !== id))
+    setTemplates(templates.filter(template => template.id !== id))
   }
 
   // 編輯模板
@@ -78,7 +76,7 @@ function TemplatesPage() {
   // 提交編輯
   const handleSubmitEdit = (updatedTemplate) => {
     setTemplates(
-      templates.map((template) =>
+      templates.map(template =>
         template.id === editingTemplate.id ? { ...template, ...updatedTemplate } : template,
       ),
     )
@@ -97,7 +95,9 @@ function TemplatesPage() {
           <Settings className="h-6 w-6" />
           模板管理
         </h1>
-        <div className="w-[70px]"></div> {/* 為了保持標題居中 */}
+        <div className="w-[70px]"></div>
+        {' '}
+        {/* 為了保持標題居中 */}
       </div>
 
       <Card>
@@ -108,7 +108,9 @@ function TemplatesPage() {
               <CardDescription>管理您的優化模板，創建自定義模板以滿足特定需求</CardDescription>
             </div>
             <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => setIsNewTemplateDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" /> 新增模板
+              <Plus className="mr-2 h-4 w-4" />
+              {' '}
+              新增模板
             </Button>
           </div>
         </CardHeader>
@@ -120,32 +122,32 @@ function TemplatesPage() {
                 <Input
                   placeholder="搜尋模板..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="pl-8"
                 />
               </div>
               <div className="flex flex-wrap gap-2">
-                {categories.map((category) => (
+                {categories.map(category => (
                   <Badge
                     key={category}
-                    variant={activeCategory === category ? "default" : "outline"}
+                    variant={activeCategory === category ? 'default' : 'outline'}
                     className={
                       activeCategory === category
-                        ? "bg-emerald-600 hover:bg-emerald-700 cursor-pointer"
-                        : "cursor-pointer hover:bg-emerald-50"
+                        ? 'bg-emerald-600 hover:bg-emerald-700 cursor-pointer'
+                        : 'cursor-pointer hover:bg-emerald-50'
                     }
                     onClick={() => setActiveCategory(category)}
                   >
-                    {category === "all"
-                      ? "全部"
-                      : category === "general"
-                        ? "一般"
-                        : category === "content"
-                          ? "內容創作"
-                          : category === "code"
-                            ? "程式碼"
-                            : category === "problem"
-                              ? "問題解決"
+                    {category === 'all'
+                      ? '全部'
+                      : category === 'general'
+                        ? '一般'
+                        : category === 'content'
+                          ? '內容創作'
+                          : category === 'code'
+                            ? '程式碼'
+                            : category === 'problem'
+                              ? '問題解決'
                               : category}
                   </Badge>
                 ))}
@@ -162,8 +164,31 @@ function TemplatesPage() {
                 <div>
                   <h3 className="font-medium mb-3">預設模板</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {defaultFilteredTemplates.length > 0 ? (
-                      defaultFilteredTemplates.map((template) => (
+                    {defaultFilteredTemplates.length > 0
+                      ? (
+                        defaultFilteredTemplates.map(template => (
+                          <TemplateCard
+                            key={template.id}
+                            template={template}
+                            onEdit={handleEditTemplate}
+                            onDelete={deleteTemplate}
+                          />
+                        ))
+                      )
+                      : (
+                        <div className="col-span-full text-center py-4 text-muted-foreground">
+                          沒有找到符合條件的預設模板
+                        </div>
+                      )}
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="custom" className="mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {customFilteredTemplates.length > 0
+                    ? (
+                      customFilteredTemplates.map(template => (
                         <TemplateCard
                           key={template.id}
                           template={template}
@@ -171,31 +196,12 @@ function TemplatesPage() {
                           onDelete={deleteTemplate}
                         />
                       ))
-                    ) : (
-                      <div className="col-span-full text-center py-4 text-muted-foreground">
-                        沒有找到符合條件的預設模板
+                    )
+                    : (
+                      <div className="col-span-full text-center py-8 text-muted-foreground">
+                        沒有找到自定義模板，點擊「新增模板」按鈕創建一個
                       </div>
                     )}
-                  </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="custom" className="mt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {customFilteredTemplates.length > 0 ? (
-                    customFilteredTemplates.map((template) => (
-                      <TemplateCard
-                        key={template.id}
-                        template={template}
-                        onEdit={handleEditTemplate}
-                        onDelete={deleteTemplate}
-                      />
-                    ))
-                  ) : (
-                    <div className="col-span-full text-center py-8 text-muted-foreground">
-                      沒有找到自定義模板，點擊「新增模板」按鈕創建一個
-                    </div>
-                  )}
                 </div>
               </TabsContent>
             </Tabs>
@@ -226,8 +232,8 @@ function TemplatesPage() {
               initialValues={{
                 name: editingTemplate.name,
                 description: editingTemplate.description,
-                content: editingTemplate.content || "",
-                category: editingTemplate.category || "general",
+                content: editingTemplate.content || '',
+                category: editingTemplate.category || 'general',
               }}
               onSubmit={handleSubmitEdit}
               buttonText="更新模板"
