@@ -25,8 +25,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **CSS Variables**: Extensive theming system with light/dark mode support
 
 ### Form & State Management
-- **React Hook Form**: Form validation and state management
-- **Built-in React State**: Using useState/useReducer patterns (no external state library detected)
+- **React Hook Form**: Form validation and state management (implemented)
+- **Built-in React State**: Using useState/useReducer patterns
+- **Missing**: TanStack Query for server state, Zustand for client state, Zod for validation
 
 ### Development Tools
 - **Vinxi**: Build tool and dev server
@@ -39,9 +40,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 app/
 ├── routes/                 # File-based routing (TanStack Router)
 │   ├── __root.tsx         # Root layout with global styles
-│   └── index.tsx          # Authentication page (login/register)
+│   ├── index.tsx          # Authentication page (login/register tabs)
+│   ├── prompt/
+│   │   └── index.tsx      # Prompt optimization page
+│   ├── templates/
+│   │   └── index.tsx      # Template management page
+│   └── history/
+│       └── index.tsx      # History viewing page
 ├── components/
-│   └── ui/                # shadcn/ui components (Button, Card, Input, etc.)
+│   ├── ui/                # shadcn/ui components (13 components)
+│   │   ├── button.tsx, card.tsx, input.tsx, etc.
+│   ├── api-key-input.tsx
+│   ├── frequently-asked-questions.tsx
+│   ├── prompt-optimizer.tsx
+│   ├── template-form.tsx
+│   ├── template-manager.tsx
+│   └── template-selector.tsx
 ├── lib/
 │   └── utils.ts           # Utility functions (cn helper)
 ├── styles/
@@ -86,24 +100,48 @@ app/
 - UI components follow shadcn/ui conventions
 - Icon usage via Lucide React
 
-### Authentication Flow
-- Current implementation has mock authentication in index route
-- Forms include loading states, error handling, and success messages
-- Password visibility toggles and validation feedback
+### Authentication & Data Flow
+- Authentication UI implemented as tabs on index route (login/register)
+- All API calls currently mocked with setTimeout (no real backend integration)
+- Form handling with React Hook Form but missing Zod validation
+- Mock data used throughout application for templates, history, and optimization
+- Missing protected routes and proper authentication state management
 
 ## Current Implementation Status
 
 The project currently contains:
-- Basic authentication UI (login/register forms)
-- shadcn/ui component system setup
+- Complete authentication UI with login/register tabs on index route
+- Full application routes: `/prompt/` (optimization), `/templates/` (management), `/history/` (viewing)
+- Comprehensive shadcn/ui component system (13 UI components)
+- Business components: prompt-optimizer, template-manager, template-selector, api-key-input, FAQ
 - TanStack Router with file-based routing
-- Tailwind CSS theming system
-- Form validation with React Hook Form
+- Tailwind CSS v4 theming system with extensive CSS variables
+- Form handling with React Hook Form
 
 Missing implementations noted in code:
-- Actual API integration (currently mocked)
-- Navigation after successful auth
-- Additional application routes beyond authentication
+- TanStack Query for server state management (not in dependencies)
+- Zustand for client state management (not in dependencies)
+- Zod validation schemas (not in dependencies)
+- Actual API integration (currently mocked with setTimeout)
+- Protected routes and proper authentication flow
+- Error boundaries and loading states
+- Settings page (`/settings` route missing)
+
+## Mock Data & Current Features
+
+### Implemented Features with Mock Data
+- **Template Management**: Full CRUD with mock templates including "程式碼優化", "內容創作", "問題解決"
+- **Prompt Optimization**: UI complete with template selection, model/temperature controls, mock optimization results
+- **History Page**: List view with filtering, search, and mock optimization history
+- **API Key Input**: Component for user API key management
+- **FAQ Component**: Collapsible questions about the service
+
+### Mock Data Patterns
+- All API calls use `setTimeout()` to simulate network delays
+- Mock authentication returns hardcoded success responses
+- Template data includes realistic Chinese prompts and descriptions
+- History data includes timestamp, model info, and optimization results
+- Error handling simulated with random failures in some mock calls
 
 ## Build & Deployment
 
@@ -111,3 +149,36 @@ Missing implementations noted in code:
 - No specific deployment configuration detected
 - CSS is processed through PostCSS with Tailwind
 - TypeScript compilation with modern ES targets (ES2022)
+
+## Next Development Priorities
+
+When working on this codebase, prioritize in this order:
+
+### 1. State Management & API Integration (High Priority)
+- Add TanStack Query for server state: `pnpm add @tanstack/react-query`
+- Add Zustand for client state: `pnpm add zustand`
+- Replace all mock API calls with real backend integration
+- Implement proper error handling and loading states
+
+### 2. Form Validation (High Priority)
+- Add Zod validation: `pnpm add zod @hookform/resolvers`
+- Create validation schemas for login, register, template forms
+- Replace basic form validation with proper Zod schemas
+
+### 3. Authentication Flow (Medium Priority)
+- Implement protected routes wrapper
+- Add proper authentication state management
+- Handle token storage and refresh
+- Redirect logic after login/logout
+
+### 4. Missing Features (Medium Priority)
+- Create `/settings` route and page
+- Add error boundaries for better error handling
+- Implement proper navigation between authenticated routes
+- Add toast notifications for user feedback
+
+### 5. Code Quality (Low Priority)
+- Add proper TypeScript interfaces for all API responses
+- Implement proper loading skeletons
+- Add accessibility improvements
+- Performance optimizations
