@@ -1,4 +1,3 @@
-import { createFileRoute } from '@tanstack/react-router'
 import { Clock, Lightbulb, Settings, User } from 'lucide-react'
 import { useState } from 'react'
 import { FrequentlyAskedQuestions } from '@/components/frequently-asked-questions'
@@ -65,6 +64,6 @@ function PromptMasterAI() {
   )
 }
 
-export const Route = createFileRoute('/prompt/')({
+export const Route = createFileRoute({
   component: PromptMasterAI,
 })

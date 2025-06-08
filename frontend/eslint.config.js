@@ -7,6 +7,7 @@ export default antfu({
   yaml: false,
   jsx: true,
   javascript: true,
+  markdown: false,
   stylistic: {
     indent: 2,
     quotes: 'single',

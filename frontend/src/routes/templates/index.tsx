@@ -1,6 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router'
 import { ArrowLeft, Edit, Plus, Search, Settings, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { TemplateForm } from '@/components/template-form'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,33 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-export const Route = createFileRoute('/templates/')({
+interface Template {
+  id: number
+  name: string
+  description: string
+  content?: string
+  category: string
+  isDefault: boolean
+}
+
+interface TemplateFormData {
+  name: string
+  description: string
+  content: string
+  category: string
+}
+
+interface TemplateCardProps {
+  template: Template
+  onEdit: (template: Template) => void
+  onDelete: (id: number) => void
+}
+
+interface SearchFormData {
+  searchQuery: string
+}
+
+export const Route = createFileRoute({
   component: TemplatesPage,
 })
 
@@ -27,9 +53,18 @@ function TemplatesPage() {
   const [templates, setTemplates] = useState(defaultTemplates)
   const [isNewTemplateDialogOpen, setIsNewTemplateDialogOpen] = useState(false)
   const [isEditTemplateDialogOpen, setIsEditTemplateDialogOpen] = useState(false)
-  const [editingTemplate, setEditingTemplate] = useState(null)
-  const [searchQuery, setSearchQuery] = useState('')
+  const [editingTemplate, setEditingTemplate] = useState<Template | null>(null)
   const [activeCategory, setActiveCategory] = useState('all')
+
+  // React Hook Form 設定
+  const searchForm = useForm<SearchFormData>({
+    defaultValues: {
+      searchQuery: '',
+    },
+  })
+
+  const { register, watch } = searchForm
+  const searchQuery = watch('searchQuery')
 
   // 獲取所有唯一的類別
   const categories = ['all', ...new Set(templates.map(t => t.category))]
@@ -38,7 +73,7 @@ function TemplatesPage() {
   const filteredTemplates = templates.filter((template) => {
     const matchesSearch
       = template.name.toLowerCase().includes(searchQuery.toLowerCase())
-      || template.description.toLowerCase().includes(searchQuery.toLowerCase())
+        || template.description.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = activeCategory === 'all' || template.category === activeCategory
 
     return matchesSearch && matchesCategory
@@ -49,7 +84,7 @@ function TemplatesPage() {
   const customFilteredTemplates = filteredTemplates.filter(t => !t.isDefault)
 
   // 新增自定義模板
-  const addCustomTemplate = (template) => {
+  const addCustomTemplate = (template: TemplateFormData) => {
     const newTemplateObj = {
       id: templates.length + 1,
       name: template.name,
@@ -63,21 +98,21 @@ function TemplatesPage() {
   }
 
   // 刪除模板
-  const deleteTemplate = (id) => {
+  const deleteTemplate = (id: number) => {
     setTemplates(templates.filter(template => template.id !== id))
   }
 
   // 編輯模板
-  const handleEditTemplate = (template) => {
+  const handleEditTemplate = (template: Template) => {
     setEditingTemplate(template)
     setIsEditTemplateDialogOpen(true)
   }
 
   // 提交編輯
-  const handleSubmitEdit = (updatedTemplate) => {
+  const handleSubmitEdit = (updatedTemplate: TemplateFormData) => {
     setTemplates(
       templates.map(template =>
-        template.id === editingTemplate.id ? { ...template, ...updatedTemplate } : template,
+        template.id === editingTemplate!.id ? { ...template, ...updatedTemplate } : template,
       ),
     )
     setIsEditTemplateDialogOpen(false)
@@ -87,8 +122,12 @@ function TemplatesPage() {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-6">
-        <Button variant="ghost" className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" />
+        <Button className="group cursor-pointer" variant="ghost">
+          <ArrowLeft
+            className="-ms-1 opacity-60 transition-transform group-hover:-translate-x-0.5"
+            size={16}
+            aria-hidden="true"
+          />
           返回
         </Button>
         <h1 className="text-2xl font-bold text-emerald-600 flex items-center gap-2">
@@ -121,8 +160,7 @@ function TemplatesPage() {
                 <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="搜尋模板..."
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
+                  {...register('searchQuery')}
                   className="pl-8"
                 />
               </div>
@@ -166,20 +204,20 @@ function TemplatesPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {defaultFilteredTemplates.length > 0
                       ? (
-                        defaultFilteredTemplates.map(template => (
-                          <TemplateCard
-                            key={template.id}
-                            template={template}
-                            onEdit={handleEditTemplate}
-                            onDelete={deleteTemplate}
-                          />
-                        ))
-                      )
+                          defaultFilteredTemplates.map(template => (
+                            <TemplateCard
+                              key={template.id}
+                              template={template}
+                              onEdit={handleEditTemplate}
+                              onDelete={deleteTemplate}
+                            />
+                          ))
+                        )
                       : (
-                        <div className="col-span-full text-center py-4 text-muted-foreground">
-                          沒有找到符合條件的預設模板
-                        </div>
-                      )}
+                          <div className="col-span-full text-center py-4 text-muted-foreground">
+                            沒有找到符合條件的預設模板
+                          </div>
+                        )}
                   </div>
                 </div>
               </TabsContent>
@@ -188,20 +226,20 @@ function TemplatesPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {customFilteredTemplates.length > 0
                     ? (
-                      customFilteredTemplates.map(template => (
-                        <TemplateCard
-                          key={template.id}
-                          template={template}
-                          onEdit={handleEditTemplate}
-                          onDelete={deleteTemplate}
-                        />
-                      ))
-                    )
+                        customFilteredTemplates.map(template => (
+                          <TemplateCard
+                            key={template.id}
+                            template={template}
+                            onEdit={handleEditTemplate}
+                            onDelete={deleteTemplate}
+                          />
+                        ))
+                      )
                     : (
-                      <div className="col-span-full text-center py-8 text-muted-foreground">
-                        沒有找到自定義模板，點擊「新增模板」按鈕創建一個
-                      </div>
-                    )}
+                        <div className="col-span-full text-center py-8 text-muted-foreground">
+                          沒有找到自定義模板，點擊「新增模板」按鈕創建一個
+                        </div>
+                      )}
                 </div>
               </TabsContent>
             </Tabs>
@@ -246,7 +284,7 @@ function TemplatesPage() {
 }
 
 // 模板卡片組件
-function TemplateCard({ template, onEdit, onDelete }) {
+function TemplateCard({ template, onEdit, onDelete }: TemplateCardProps) {
   return (
     <Card className="overflow-hidden">
       <CardHeader className="pb-2">
