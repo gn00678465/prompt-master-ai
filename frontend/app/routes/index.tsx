@@ -1,16 +1,16 @@
-import type React from "react"
-import type { SubmitHandler } from "react-hook-form"
+import type React from 'react'
+import type { SubmitHandler } from 'react-hook-form'
 
 import { createFileRoute } from '@tanstack/react-router'
-import { Eye, EyeOff, Lightbulb } from "lucide-react"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Eye, EyeOff, Lightbulb } from 'lucide-react'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export const Route = createFileRoute('/')({
   component: AuthPage,
@@ -18,23 +18,23 @@ export const Route = createFileRoute('/')({
 
 // 定義表單型別
 interface LoginFormData {
-  username: string;
-  password: string;
+  username: string
+  password: string
 }
 
 interface RegisterFormData {
-  username: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
+  username: string
+  email: string
+  password: string
+  confirmPassword: string
 }
 
 function AuthPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
   // 登入表單狀態
   const {
@@ -43,9 +43,9 @@ function AuthPage() {
     formState: { errors: loginErrors },
   } = useForm<LoginFormData>({
     defaultValues: {
-      username: "",
-      password: "",
-    }
+      username: '',
+      password: '',
+    },
   })
 
   // 註冊表單狀態
@@ -56,33 +56,35 @@ function AuthPage() {
     formState: { errors: registerErrors },
   } = useForm<RegisterFormData>({
     defaultValues: {
-      username: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    }
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
   })
 
   // 處理登入
   const handleLogin: SubmitHandler<LoginFormData> = async (_data) => {
     setIsLoading(true)
-    setError("")
+    setError('')
 
     try {
       // 這裡應該調用實際的 API
       // console.log("Login attempt:", data)
 
       // 模擬 API 調用
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await new Promise(resolve => setTimeout(resolve, 1000))
 
       // 模擬成功登入
-      setSuccess("登入成功！正在跳轉...")
+      setSuccess('登入成功！正在跳轉...')
       setTimeout(() => {
         // router.push("/")
       }, 1000)
-    } catch {
-      setError("登入失敗，請檢查您的用戶名和密碼")
-    } finally {
+    }
+    catch {
+      setError('登入失敗，請檢查您的用戶名和密碼')
+    }
+    finally {
       setIsLoading(false)
     }
   }
@@ -90,23 +92,25 @@ function AuthPage() {
   // 處理註冊
   const handleRegister: SubmitHandler<RegisterFormData> = async (_data) => {
     setIsLoading(true)
-    setError("")
+    setError('')
 
     try {
       // 這裡應該調用實際的 API
       // console.log("Register attempt:", data)
 
       // 模擬 API 調用
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await new Promise(resolve => setTimeout(resolve, 1000))
 
       // 模擬成功註冊
-      setSuccess("註冊成功！正在跳轉...")
+      setSuccess('註冊成功！正在跳轉...')
       setTimeout(() => {
         // router.push("/")
       }, 1000)
-    } catch {
-      setError("註冊失敗，請稍後再試")
-    } finally {
+    }
+    catch {
+      setError('註冊失敗，請稍後再試')
+    }
+    finally {
       setIsLoading(false)
     }
   }
@@ -153,9 +157,9 @@ function AuthPage() {
                     <Input
                       id="login-username"
                       type="text"
-                      {...loginRegister("username", {
-                        required: "請輸入用戶名",
-                        minLength: { value: 3, message: "用戶名至少需要 3 個字元" }
+                      {...loginRegister('username', {
+                        required: '請輸入用戶名',
+                        minLength: { value: 3, message: '用戶名至少需要 3 個字元' },
                       })}
                       placeholder="輸入您的用戶名"
                     />
@@ -169,10 +173,10 @@ function AuthPage() {
                     <div className="relative">
                       <Input
                         id="login-password"
-                        type={showPassword ? "text" : "password"}
-                        {...loginRegister("password", {
-                          required: "請輸入密碼",
-                          minLength: { value: 6, message: "密碼至少需要 6 個字元" }
+                        type={showPassword ? 'text' : 'password'}
+                        {...loginRegister('password', {
+                          required: '請輸入密碼',
+                          minLength: { value: 6, message: '密碼至少需要 6 個字元' },
                         })}
                         placeholder="輸入您的密碼"
                       />
@@ -192,7 +196,7 @@ function AuthPage() {
                   </div>
 
                   <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700" disabled={isLoading}>
-                    {isLoading ? "登入中..." : "登入"}
+                    {isLoading ? '登入中...' : '登入'}
                   </Button>
                 </form>
               </TabsContent>
@@ -205,9 +209,9 @@ function AuthPage() {
                     <Input
                       id="register-username"
                       type="text"
-                      {...registerRegister("username", {
-                        required: "請輸入用戶名",
-                        minLength: { value: 3, message: "用戶名至少需要 3 個字元" }
+                      {...registerRegister('username', {
+                        required: '請輸入用戶名',
+                        minLength: { value: 3, message: '用戶名至少需要 3 個字元' },
                       })}
                       placeholder="選擇一個用戶名"
                     />
@@ -221,12 +225,12 @@ function AuthPage() {
                     <Input
                       id="register-email"
                       type="email"
-                      {...registerRegister("email", {
-                        required: "請輸入電子郵件",
+                      {...registerRegister('email', {
+                        required: '請輸入電子郵件',
                         pattern: {
                           value: /^[\w.%+-]+@[\w.-]+\.[A-Z]{2,}$/i,
-                          message: "請輸入有效的電子郵件地址"
-                        }
+                          message: '請輸入有效的電子郵件地址',
+                        },
                       })}
                       placeholder="輸入您的電子郵件"
                     />
@@ -240,10 +244,10 @@ function AuthPage() {
                     <div className="relative">
                       <Input
                         id="register-password"
-                        type={showPassword ? "text" : "password"}
-                        {...registerRegister("password", {
-                          required: "請輸入密碼",
-                          minLength: { value: 8, message: "密碼至少需要 8 個字元" }
+                        type={showPassword ? 'text' : 'password'}
+                        {...registerRegister('password', {
+                          required: '請輸入密碼',
+                          minLength: { value: 8, message: '密碼至少需要 8 個字元' },
                         })}
                         placeholder="至少 8 個字元"
                       />
@@ -267,13 +271,13 @@ function AuthPage() {
                     <div className="relative">
                       <Input
                         id="register-confirm-password"
-                        type={showConfirmPassword ? "text" : "password"}
-                        {...registerRegister("confirmPassword", {
-                          required: "請確認密碼",
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        {...registerRegister('confirmPassword', {
+                          required: '請確認密碼',
                           validate: (value) => {
-                            const password = registerWatch("password")
-                            return value === password || "密碼確認不匹配"
-                          }
+                            const password = registerWatch('password')
+                            return value === password || '密碼確認不匹配'
+                          },
                         })}
                         placeholder="再次輸入密碼"
                       />
@@ -293,7 +297,7 @@ function AuthPage() {
                   </div>
 
                   <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700" disabled={isLoading}>
-                    {isLoading ? "註冊中..." : "註冊"}
+                    {isLoading ? '註冊中...' : '註冊'}
                   </Button>
                 </form>
               </TabsContent>

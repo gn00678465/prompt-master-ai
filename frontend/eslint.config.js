@@ -12,6 +12,6 @@ export default antfu({
     quotes: 'single',
   },
   ignores: [
-    '**/routeTree.gen.ts'
-  ]
+    '**/routeTree.gen.ts',
+  ],
 })

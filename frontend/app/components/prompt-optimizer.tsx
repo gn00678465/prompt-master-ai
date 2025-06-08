@@ -17,7 +17,9 @@ export function PromptOptimizer({ templates }) {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2 text-emerald-600">
-            <Edit className="h-5 w-5" /> 優化設置
+            <Edit className="h-5 w-5" />
+            {' '}
+            優化設置
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -38,7 +40,7 @@ export function PromptOptimizer({ templates }) {
             <TemplateSelector
               templates={templates}
               selectedTemplateId={selectedTemplate}
-              onSelectTemplate={(id) => setSelectedTemplate(id)}
+              onSelectTemplate={id => setSelectedTemplate(id)}
             />
           </div>
 
@@ -70,13 +72,17 @@ export function PromptOptimizer({ templates }) {
 
           <div className="space-y-2">
             <h3 className="font-medium flex items-center gap-2">
-              <Edit className="h-4 w-4 text-emerald-600" /> 原始提示詞
+              <Edit className="h-4 w-4 text-emerald-600" />
+              {' '}
+              原始提示詞
             </h3>
             <Textarea placeholder="在此輸入您的原始提示詞..." className="min-h-[150px]" />
           </div>
 
           <Button className="w-full bg-emerald-600 hover:bg-emerald-700 flex items-center justify-center gap-2">
-            <Edit className="h-4 w-4" /> 優化提示詞
+            <Edit className="h-4 w-4" />
+            {' '}
+            優化提示詞
           </Button>
         </CardContent>
       </Card>
@@ -84,7 +90,9 @@ export function PromptOptimizer({ templates }) {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2 text-emerald-600">
-            <Lightbulb className="h-5 w-5" /> 優化結果
+            <Lightbulb className="h-5 w-5" />
+            {' '}
+            優化結果
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -94,10 +102,14 @@ export function PromptOptimizer({ templates }) {
 
           <div className="flex gap-2 mt-4 justify-end">
             <Button variant="outline" className="flex items-center gap-2">
-              <Copy className="h-4 w-4" /> 複製結果
+              <Copy className="h-4 w-4" />
+              {' '}
+              複製結果
             </Button>
             <Button variant="outline" className="flex items-center gap-2">
-              <Trash2 className="h-4 w-4" /> 清空
+              <Trash2 className="h-4 w-4" />
+              {' '}
+              清空
             </Button>
           </div>
         </CardContent>

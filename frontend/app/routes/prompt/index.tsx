@@ -45,7 +45,9 @@ function PromptMasterAI() {
 
       <div className="text-center mb-6">
         <h1 className="text-2xl font-bold text-emerald-600 flex items-center justify-center gap-2">
-          <Lightbulb className="h-6 w-6" /> Better Prompt - Prompt 優化神器
+          <Lightbulb className="h-6 w-6" />
+          {' '}
+          Better Prompt - Prompt 優化神器
         </h1>
         <p className="text-muted-foreground mt-2">
           一鍵優化您的提示詞，釋放 AI 模型潛能，支援各種模板與模型，請先設置 Gemini API Key 開始使用。

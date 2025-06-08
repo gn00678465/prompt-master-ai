@@ -225,7 +225,7 @@ interface AuthStore {
   user: User | null
   token: string | null
   isAuthenticated: boolean
-  
+
   // Actions
   login: (token: string, user: User) => void
   logout: () => Promise<void>
@@ -239,7 +239,7 @@ interface AuthStore {
 interface UIStore {
   theme: 'light' | 'dark'
   sidebarOpen: boolean
-  
+
   // Actions
   toggleTheme: () => void
   toggleSidebar: () => void
@@ -265,18 +265,18 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 class ApiClient {
   private baseURL: string
-  
+
   constructor(baseURL: string) {
     this.baseURL = baseURL
   }
-  
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`
     const token = getToken() // 從 localStorage 或狀態管理取得
-    
+
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
@@ -285,35 +285,35 @@ class ApiClient {
       },
       ...options,
     }
-    
+
     const response = await fetch(url, config)
-    
+
     if (!response.ok) {
       throw new ApiError(response.status, await response.text())
     }
-    
+
     return response.json()
   }
-  
+
   // HTTP methods
   get<T>(endpoint: string) {
     return this.request<T>(endpoint)
   }
-  
+
   post<T>(endpoint: string, data?: any) {
     return this.request<T>(endpoint, {
       method: 'POST',
       body: JSON.stringify(data),
     })
   }
-  
+
   put<T>(endpoint: string, data?: any) {
     return this.request<T>(endpoint, {
       method: 'PUT',
       body: JSON.stringify(data),
     })
   }
-  
+
   delete<T>(endpoint: string) {
     return this.request<T>(endpoint, {
       method: 'DELETE',
@@ -327,16 +327,16 @@ export const apiClient = new ApiClient(API_BASE_URL)
 #### 3.3.2 Query Hooks 設計
 ```typescript
 // lib/hooks/useTemplates.ts
-export const useTemplates = (category?: string) => {
+export function useTemplates(category?: string) {
   return useQuery({
     queryKey: ['templates', { category }],
     queryFn: () => templatesApi.getTemplates({ category }),
   })
 }
 
-export const useCreateTemplate = () => {
+export function useCreateTemplate() {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: templatesApi.createTemplate,
     onSuccess: () => {
@@ -345,11 +345,11 @@ export const useCreateTemplate = () => {
   })
 }
 
-export const useUpdateTemplate = () => {
+export function useUpdateTemplate() {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: UpdateTemplateData }) =>
+    mutationFn: ({ id, data }: { id: number, data: UpdateTemplateData }) =>
       templatesApi.updateTemplate(id, data),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['templates'] })
@@ -358,9 +358,9 @@ export const useUpdateTemplate = () => {
   })
 }
 
-export const useDeleteTemplate = () => {
+export function useDeleteTemplate() {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: templatesApi.deleteTemplate,
     onSuccess: () => {
@@ -373,9 +373,9 @@ export const useDeleteTemplate = () => {
 #### 3.3.3 認證處理
 ```typescript
 // lib/hooks/useAuth.ts
-export const useAuth = () => {
+export function useAuth() {
   const authStore = useAuthStore()
-  
+
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: (data) => {
@@ -389,7 +389,7 @@ export const useAuth = () => {
       // 處理登入錯誤
     },
   })
-  
+
   const logoutMutation = useMutation({
     mutationFn: authApi.logout,
     onSuccess: () => {
@@ -397,7 +397,7 @@ export const useAuth = () => {
       // 重定向到登入頁
     },
   })
-  
+
   const registerMutation = useMutation({
     mutationFn: authApi.register,
     onSuccess: (data) => {
@@ -408,7 +408,7 @@ export const useAuth = () => {
       // 重定向到優化頁面
     },
   })
-  
+
   return {
     ...authStore,
     login: loginMutation.mutate,
@@ -478,16 +478,16 @@ interface TemplateSelectorProps {
   showCreateButton?: boolean
 }
 
-export const TemplateSelector = ({ 
-  selectedTemplateId, 
+export const TemplateSelector = ({
+  selectedTemplateId,
   onTemplateSelect,
-  showCreateButton = true 
+  showCreateButton = true
 }: TemplateSelectorProps) => {
   const { data: templates, isLoading } = useTemplates()
-  
+
   const defaultTemplates = templates?.filter(t => t.is_default) || []
   const customTemplates = templates?.filter(t => !t.is_default) || []
-  
+
   return (
     <div className="space-y-4">
       {/* 預設模板區塊 */}
@@ -505,7 +505,7 @@ export const TemplateSelector = ({
           ))}
         </div>
       </div>
-      
+
       {/* 自定義模板區塊 */}
       <div>
         <div className="flex justify-between items-center mb-2">
@@ -554,11 +554,11 @@ const templateSchema = z.object({
   category: z.string().optional(),
 })
 
-export const TemplateForm = ({ 
-  template, 
-  mode, 
-  onSubmit, 
-  onCancel 
+export const TemplateForm = ({
+  template,
+  mode,
+  onSubmit,
+  onCancel
 }: TemplateFormProps) => {
   const form = useForm<CreateTemplateData>({
     resolver: zodResolver(templateSchema),
@@ -569,9 +569,9 @@ export const TemplateForm = ({
       category: template?.category || '',
     },
   })
-  
+
   const [preview, setPreview] = useState(false)
-  
+
   return (
     <Card className="max-w-4xl mx-auto">
       <CardHeader>
@@ -579,7 +579,7 @@ export const TemplateForm = ({
           {mode === 'create' ? '創建新模板' : '編輯模板'}
         </CardTitle>
       </CardHeader>
-      
+
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -598,7 +598,7 @@ export const TemplateForm = ({
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="category"
@@ -623,7 +623,7 @@ export const TemplateForm = ({
                 )}
               />
             </div>
-            
+
             <FormField
               control={form.control}
               name="description"
@@ -637,7 +637,7 @@ export const TemplateForm = ({
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="content"
@@ -671,7 +671,7 @@ export const TemplateForm = ({
                 </FormItem>
               )}
             />
-            
+
             <div className="flex justify-end space-x-4">
               <Button type="button" variant="outline" onClick={onCancel}>
                 取消
@@ -702,12 +702,12 @@ function OptimizePage() {
   const [originalPrompt, setOriginalPrompt] = useState('')
   const [model, setModel] = useState('gemini-pro')
   const [temperature, setTemperature] = useState(0.7)
-  
+
   const optimizeMutation = useOptimizePrompt()
-  
+
   const handleOptimize = () => {
     if (!selectedTemplateId || !originalPrompt.trim()) return
-    
+
     optimizeMutation.mutate({
       original_prompt: originalPrompt,
       template_id: selectedTemplateId,
@@ -715,7 +715,7 @@ function OptimizePage() {
       temperature,
     })
   }
-  
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -732,7 +732,7 @@ function OptimizePage() {
               />
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <CardTitle>輸入 Prompt</CardTitle>
@@ -745,7 +745,7 @@ function OptimizePage() {
               />
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <CardTitle>優化設定</CardTitle>
@@ -753,7 +753,7 @@ function OptimizePage() {
             <CardContent className="space-y-4">
               <ModelSelector value={model} onChange={setModel} />
               <TemperatureSlider value={temperature} onChange={setTemperature} />
-              
+
               <Button
                 onClick={handleOptimize}
                 disabled={!selectedTemplateId || !originalPrompt.trim() || optimizeMutation.isPending}
@@ -764,7 +764,7 @@ function OptimizePage() {
             </CardContent>
           </Card>
         </div>
-        
+
         {/* 右側：結果區域 */}
         <div>
           <Card className="sticky top-4">
@@ -927,7 +927,7 @@ interface AuthStore {
   user: User | null
   token: string | null
   isAuthenticated: boolean
-  
+
   // Actions
   login: (token: string, user: User) => void
   logout: () => Promise<void>
@@ -942,43 +942,44 @@ export const useAuthStore = create<AuthStore>()(
       user: null,
       token: null,
       isAuthenticated: false,
-      
+
       login: (token: string, user: User) => {
-        set({ 
-          token, 
-          user, 
-          isAuthenticated: true 
+        set({
+          token,
+          user,
+          isAuthenticated: true
         })
       },
-      
+
       logout: async () => {
         const { token } = get()
         if (token) {
           try {
             await authApi.logout()
-          } catch (error) {
+          }
+          catch (error) {
             console.error('Logout error:', error)
           }
         }
-        set({ 
-          user: null, 
-          token: null, 
-          isAuthenticated: false 
+        set({
+          user: null,
+          token: null,
+          isAuthenticated: false
         })
       },
-      
+
       setUser: (user: User) => {
         set({ user })
       },
-      
+
       clearAuth: () => {
-        set({ 
-          user: null, 
-          token: null, 
-          isAuthenticated: false 
+        set({
+          user: null,
+          token: null,
+          isAuthenticated: false
         })
       },
-      
+
       refreshToken: async () => {
         // 實施 token 刷新邏輯（如果後端支援）
         return false
@@ -986,10 +987,10 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'auth-storage',
-      partialize: (state) => ({ 
-        token: state.token, 
+      partialize: state => ({
+        token: state.token,
         user: state.user,
-        isAuthenticated: state.isAuthenticated 
+        isAuthenticated: state.isAuthenticated
       }),
     }
   )
@@ -1005,7 +1006,7 @@ import { persist } from 'zustand/middleware'
 interface UIStore {
   theme: 'light' | 'dark' | 'system'
   sidebarOpen: boolean
-  
+
   // Actions
   setTheme: (theme: 'light' | 'dark' | 'system') => void
   toggleTheme: () => void
@@ -1018,23 +1019,23 @@ export const useUIStore = create<UIStore>()(
     (set, get) => ({
       theme: 'system',
       sidebarOpen: true,
-      
+
       setTheme: (theme) => {
         set({ theme })
         // 應用主題到 document
         applyTheme(theme)
       },
-      
+
       toggleTheme: () => {
         const { theme } = get()
         const newTheme = theme === 'light' ? 'dark' : 'light'
         get().setTheme(newTheme)
       },
-      
+
       setSidebarOpen: (open) => {
         set({ sidebarOpen: open })
       },
-      
+
       toggleSidebar: () => {
         const { sidebarOpen } = get()
         set({ sidebarOpen: !sidebarOpen })
@@ -1047,17 +1048,19 @@ export const useUIStore = create<UIStore>()(
 )
 
 function applyTheme(theme: 'light' | 'dark' | 'system') {
-  if (typeof window === 'undefined') return
-  
+  if (typeof window === 'undefined')
+    return
+
   const root = window.document.documentElement
   root.classList.remove('light', 'dark')
-  
+
   if (theme === 'system') {
-    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches 
-      ? 'dark' 
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
       : 'light'
     root.classList.add(systemTheme)
-  } else {
+  }
+  else {
     root.classList.add(theme)
   }
 }
@@ -1093,14 +1096,14 @@ export const queryClient = new QueryClient({
 
 #### 9.2.2 API Hooks 實現
 ```typescript
+import type { OptimizePromptRequest, OptimizePromptResponse } from '../types/api'
 // lib/hooks/usePrompts.ts
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { promptsApi } from '../api/prompts'
-import type { OptimizePromptRequest, OptimizePromptResponse } from '../types/api'
 
-export const useOptimizePrompt = () => {
+export function useOptimizePrompt() {
   const queryClient = useQueryClient()
-  
+
   return useMutation<OptimizePromptResponse, Error, OptimizePromptRequest>({
     mutationFn: promptsApi.optimize,
     onSuccess: () => {
@@ -1113,7 +1116,7 @@ export const useOptimizePrompt = () => {
   })
 }
 
-export const usePromptHistory = () => {
+export function usePromptHistory() {
   return useQuery({
     queryKey: ['prompt-history'],
     queryFn: promptsApi.getHistory,
@@ -1121,14 +1124,14 @@ export const usePromptHistory = () => {
 }
 
 // lib/hooks/useTemplates.ts
-export const useTemplates = (options?: { category?: string }) => {
+export function useTemplates(options?: { category?: string }) {
   return useQuery({
     queryKey: ['templates', options],
     queryFn: () => templatesApi.getTemplates(options),
   })
 }
 
-export const useTemplate = (templateId: number) => {
+export function useTemplate(templateId: number) {
   return useQuery({
     queryKey: ['template', templateId],
     queryFn: () => templatesApi.getTemplate(templateId),
@@ -1136,9 +1139,9 @@ export const useTemplate = (templateId: number) => {
   })
 }
 
-export const useCreateTemplate = () => {
+export function useCreateTemplate() {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: templatesApi.create,
     onSuccess: () => {
@@ -1147,11 +1150,11 @@ export const useCreateTemplate = () => {
   })
 }
 
-export const useUpdateTemplate = () => {
+export function useUpdateTemplate() {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: UpdateTemplateData }) =>
+    mutationFn: ({ id, data }: { id: number, data: UpdateTemplateData }) =>
       templatesApi.update(id, data),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['templates'] })
@@ -1160,9 +1163,9 @@ export const useUpdateTemplate = () => {
   })
 }
 
-export const useDeleteTemplate = () => {
+export function useDeleteTemplate() {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: templatesApi.delete,
     onSuccess: () => {
@@ -1282,14 +1285,14 @@ export const registerSchema = z.object({
   username: z.string()
     .min(3, '用戶名至少需要 3 個字元')
     .max(20, '用戶名不能超過 20 個字元')
-    .regex(/^[a-zA-Z0-9_]+$/, '用戶名只能包含字母、數字和下劃線'),
+    .regex(/^\w+$/, '用戶名只能包含字母、數字和下劃線'),
   email: z.string()
     .email('請輸入有效的電子郵件地址'),
   password: z.string()
     .min(8, '密碼至少需要 8 個字元')
     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, '密碼必須包含大小寫字母和數字'),
   confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
+}).refine(data => data.password === data.confirmPassword, {
   message: '密碼確認不匹配',
   path: ['confirmPassword'],
 })
@@ -1343,7 +1346,7 @@ export const Route = createRootRoute<RouterContext>({
     // 檢查是否為公開路由
     const publicRoutes = ['/', '/auth/login', '/auth/register']
     const isPublicRoute = publicRoutes.includes(location.pathname)
-    
+
     if (!context.auth.isAuthenticated && !isPublicRoute) {
       throw redirect({
         to: '/auth/login',
@@ -1352,7 +1355,7 @@ export const Route = createRootRoute<RouterContext>({
         },
       })
     }
-    
+
     // 已登入用戶訪問認證頁面，重定向到優化頁面
     if (context.auth.isAuthenticated && location.pathname.startsWith('/auth')) {
       throw redirect({
@@ -1364,7 +1367,7 @@ export const Route = createRootRoute<RouterContext>({
 
 function RootComponent() {
   const auth = useAuthStore()
-  
+
   return (
     <AppLayout>
       <Outlet />
@@ -1378,13 +1381,13 @@ function RootComponent() {
 // app/components/layout/Navigation.tsx
 import { Link, useLocation } from '@tanstack/react-router'
 import { useAuthStore } from '../../lib/stores/auth'
-import { 
-  Home, 
-  Zap, 
-  BookTemplate, 
-  History, 
+import {
+  Home,
+  Zap,
+  BookTemplate,
+  History,
   Settings,
-  LogOut 
+  LogOut
 } from 'lucide-react'
 
 const navItems = [
@@ -1398,24 +1401,24 @@ const navItems = [
 export const Navigation = () => {
   const { isAuthenticated, logout } = useAuthStore()
   const location = useLocation()
-  
-  const visibleItems = navItems.filter(item => 
+
+  const visibleItems = navItems.filter(item =>
     !item.requireAuth || isAuthenticated
   )
-  
+
   return (
     <nav className="flex flex-col space-y-2">
       {visibleItems.map((item) => {
         const Icon = item.icon
         const isActive = location.pathname === item.to
-        
+
         return (
           <Link
             key={item.to}
             to={item.to}
             className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors ${
-              isActive 
-                ? 'bg-blue-100 text-blue-700' 
+              isActive
+                ? 'bg-blue-100 text-blue-700'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
@@ -1424,7 +1427,7 @@ export const Navigation = () => {
           </Link>
         )
       })}
-      
+
       {isAuthenticated && (
         <button
           onClick={logout}
@@ -1463,15 +1466,15 @@ export class ErrorBoundary extends React.Component
     super(props)
     this.state = { hasError: false }
   }
-  
+
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true, error }
   }
-  
+
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Error boundary caught an error:', error, errorInfo)
   }
-  
+
   render() {
     if (this.state.hasError) {
       return (
@@ -1495,7 +1498,7 @@ export class ErrorBoundary extends React.Component
         </div>
       )
     }
-    
+
     return this.props.children
   }
 }
@@ -1517,14 +1520,14 @@ export class ApiError extends Error {
 
 class ApiClient {
   // ... 其他方法
-  
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`
     const token = getToken()
-    
+
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
@@ -1533,32 +1536,33 @@ class ApiClient {
       },
       ...options,
     }
-    
+
     try {
       const response = await fetch(url, config)
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        
+
         // 處理認證錯誤
         if (response.status === 401) {
           useAuthStore.getState().clearAuth()
           window.location.href = '/auth/login'
         }
-        
+
         throw new ApiError(
           response.status,
           errorData.message || `HTTP ${response.status}`,
           errorData
         )
       }
-      
+
       return response.json()
-    } catch (error) {
+    }
+    catch (error) {
       if (error instanceof ApiError) {
         throw error
       }
-      
+
       // 網絡錯誤
       throw new ApiError(0, '網絡連接錯誤，請檢查您的網絡連接')
     }
@@ -1574,16 +1578,16 @@ interface LoadingSpinnerProps {
   text?: string
 }
 
-export const LoadingSpinner = ({ 
-  size = 'md', 
-  text 
+export const LoadingSpinner = ({
+  size = 'md',
+  text
 }: LoadingSpinnerProps) => {
   const sizeClasses = {
     sm: 'w-4 h-4',
     md: 'w-8 h-8',
     lg: 'w-12 h-12'
   }
-  
+
   return (
     <div className="flex flex-col items-center justify-center space-y-2">
       <div
@@ -1649,24 +1653,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
           node-version: '18'
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm ci
-        
+
       - name: Run tests
         run: npm run test
-        
+
       - name: Build
         run: npm run build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
-          
+
       - name: Deploy to Vercel
         uses: vercel/action@v20
         with:
