@@ -4,8 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
-- **Development server**: `pnpm dev` - Starts Vinxi development server
-- **Build**: `pnpm build` - Creates production build using Vinxi
+- **Development server**: `pnpm dev` - Starts Vite development server on port 3000
+- **Build**: `pnpm build` - Creates production build using Vite
 - **Start production**: `pnpm start` - Runs production server
 - **Lint**: `pnpm lint` - Runs ESLint with @antfu/eslint-config
 - **Lint fix**: `pnpm lint:fix` - Auto-fixes linting issues
@@ -16,7 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **TanStack Start**: Full-stack React framework with SSR/SSG capabilities
 - **TanStack Router**: Type-safe file-based routing system
 - **React 19**: Latest React with Concurrent Features
-- **TypeScript**: Strict typing with path aliases (`@/*` -> `./app/*`)
+- **TypeScript**: Strict typing with path aliases (`@/*` -> `./src/*`)
 
 ### UI & Styling
 - **Tailwind CSS v4**: Utility-first CSS with custom design tokens
@@ -30,14 +30,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Missing**: TanStack Query for server state, Zustand for client state, Zod for validation
 
 ### Development Tools
-- **Vinxi**: Build tool and dev server
+- **Vite**: Build tool and dev server with TanStack Start plugin
 - **ESLint**: @antfu/eslint-config with React, TypeScript, and stylistic rules
 - **PostCSS**: With Tailwind CSS processing
+- **React Compiler**: Babel plugin for React 19 compiler optimizations
 
 ## Project Structure
 
 ```
-app/
+src/
 ├── routes/                 # File-based routing (TanStack Router)
 │   ├── __root.tsx         # Root layout with global styles
 │   ├── index.tsx          # Authentication page (login/register tabs)
@@ -60,7 +61,8 @@ app/
 │   └── utils.ts           # Utility functions (cn helper)
 ├── styles/
 │   └── app.css            # Global styles with CSS variables
-└── client.tsx             # Client entry point
+├── router.tsx             # Router configuration
+└── routeTree.gen.ts       # Auto-generated route tree
 ```
 
 ## Key Architecture Patterns
@@ -69,12 +71,12 @@ app/
 - Uses TanStack Router's file-based routing
 - Route files export a `Route` created with `createFileRoute()`
 - Root route (`__root.tsx`) handles global layout and head configuration
-- Router configuration in `app/router.tsx` with scroll restoration
+- Router configuration in `src/router.tsx` with scroll restoration
 
 ### Component Architecture
 - shadcn/ui components provide consistent design system
 - Components use Tailwind CSS for styling
-- Path aliases configured: `@/*` maps to `./app/*`
+- Path aliases configured: `@/*` maps to `./src/*`
 
 ### Styling Approach
 - Tailwind CSS v4 with extensive CSS custom properties
@@ -145,10 +147,11 @@ Missing implementations noted in code:
 
 ## Build & Deployment
 
-- Vinxi handles build process and development server
+- Vite handles build process and development server with TanStack Start integration
 - No specific deployment configuration detected
-- CSS is processed through PostCSS with Tailwind
+- CSS is processed through PostCSS with Tailwind CSS v4
 - TypeScript compilation with modern ES targets (ES2022)
+- React Compiler optimizations enabled for production builds
 
 ## Next Development Priorities
 
