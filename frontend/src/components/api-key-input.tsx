@@ -1,11 +1,15 @@
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { useState } from 'react'
+import { forwardRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
-export function ApiKeyInput() {
+interface ApiKeyInputProps {
+  value?: string
+  onChange?: (value: string) => void
+}
+
+export const ApiKeyInput = forwardRef<HTMLInputElement, ApiKeyInputProps>(({ value, onChange }, ref) => {
   const [isExpanded, setIsExpanded] = useState(true)
-  const [apiKey, setApiKey] = useState('')
 
   return (
     <div className="space-y-2">
@@ -17,12 +21,13 @@ export function ApiKeyInput() {
       {isExpanded && (
         <div className="space-y-2">
           <Input
+            ref={ref}
             placeholder="您的 Gemini API 密鑰"
             type="password"
-            value={apiKey}
-            onChange={e => setApiKey(e.target.value)}
+            value={value || ''}
+            onChange={e => onChange?.(e.target.value)}
           />
-          <Button className="w-full bg-emerald-600 hover:bg-emerald-700">儲存</Button>
+          <Button type="button" className="w-full bg-emerald-600 hover:bg-emerald-700">儲存</Button>
           <p className="text-xs text-muted-foreground">
             沒有您的 Gemini API 密鑰，
             <a href="#" className="text-emerald-600 hover:underline">
@@ -33,4 +38,6 @@ export function ApiKeyInput() {
       )}
     </div>
   )
-}
+})
+
+ApiKeyInput.displayName = 'ApiKeyInput'
