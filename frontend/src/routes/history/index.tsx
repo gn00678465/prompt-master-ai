@@ -85,7 +85,7 @@ function HistoryPage() {
   }
 
   // 重新使用提示詞
-  const reusePrompt = (item: any) => {
+  const reusePrompt = (_item: any) => {
     // 這裡應該導航到優化頁面並預填充資料
   }
 
