@@ -15,7 +15,7 @@ import type { CreateFileRoute, FileRoutesByPath } from "@tanstack/react-router";
 import { Route as rootRoute } from "./routes/__root";
 import { Route as IndexRouteImport } from "./routes/index";
 import { Route as TemplatesIndexRouteImport } from "./routes/templates/index";
-import { Route as PromptIndexRouteImport } from "./routes/prompt/index";
+import { Route as PromptIndexRouteImport } from "./routes/optimizer/index";
 import { Route as HistoryIndexRouteImport } from "./routes/history/index";
 
 // Create/Update Routes
