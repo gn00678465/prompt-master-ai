@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { forwardRef, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
@@ -8,7 +8,7 @@ interface ApiKeyInputProps {
   onChange?: (value: string) => void
 }
 
-export const ApiKeyInput = forwardRef<HTMLInputElement, ApiKeyInputProps>(({ value, onChange }, ref) => {
+export function ApiKeyInput({ ref, value, onChange }: ApiKeyInputProps & { ref?: React.RefObject<HTMLInputElement | null> }) {
   const [isExpanded, setIsExpanded] = useState(true)
 
   return (
@@ -38,6 +38,6 @@ export const ApiKeyInput = forwardRef<HTMLInputElement, ApiKeyInputProps>(({ val
       )}
     </div>
   )
-})
+}
 
 ApiKeyInput.displayName = 'ApiKeyInput'
