@@ -15,7 +15,7 @@ import type { CreateFileRoute, FileRoutesByPath } from "@tanstack/react-router";
 import { Route as rootRoute } from "./routes/__root";
 import { Route as IndexRouteImport } from "./routes/index";
 import { Route as TemplatesIndexRouteImport } from "./routes/templates/index";
-import { Route as PromptIndexRouteImport } from "./routes/optimizer/index";
+import { Route as OptimizerIndexRouteImport } from "./routes/optimizer/index";
 import { Route as HistoryIndexRouteImport } from "./routes/history/index";
 
 // Create/Update Routes
@@ -32,9 +32,9 @@ const TemplatesIndexRoute = TemplatesIndexRouteImport.update({
   getParentRoute: () => rootRoute,
 } as any);
 
-const PromptIndexRoute = PromptIndexRouteImport.update({
-  id: "/prompt/",
-  path: "/prompt/",
+const OptimizerIndexRoute = OptimizerIndexRouteImport.update({
+  id: "/optimizer/",
+  path: "/optimizer/",
   getParentRoute: () => rootRoute,
 } as any);
 
@@ -62,11 +62,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof HistoryIndexRouteImport;
       parentRoute: typeof rootRoute;
     };
-    "/prompt/": {
-      id: "/prompt/";
-      path: "/prompt";
-      fullPath: "/prompt";
-      preLoaderRoute: typeof PromptIndexRouteImport;
+    "/optimizer/": {
+      id: "/optimizer/";
+      path: "/optimizer";
+      fullPath: "/optimizer";
+      preLoaderRoute: typeof OptimizerIndexRouteImport;
       parentRoute: typeof rootRoute;
     };
     "/templates/": {
@@ -99,13 +99,13 @@ declare module "./routes/history/index" {
     FileRoutesByPath["/history/"]["fullPath"]
   >;
 }
-declare module "./routes/prompt/index" {
+declare module "./routes/optimizer/index" {
   const createFileRoute: CreateFileRoute<
-    "/prompt/",
-    FileRoutesByPath["/prompt/"]["parentRoute"],
-    FileRoutesByPath["/prompt/"]["id"],
-    FileRoutesByPath["/prompt/"]["path"],
-    FileRoutesByPath["/prompt/"]["fullPath"]
+    "/optimizer/",
+    FileRoutesByPath["/optimizer/"]["parentRoute"],
+    FileRoutesByPath["/optimizer/"]["id"],
+    FileRoutesByPath["/optimizer/"]["path"],
+    FileRoutesByPath["/optimizer/"]["fullPath"]
   >;
 }
 declare module "./routes/templates/index" {
@@ -123,14 +123,14 @@ declare module "./routes/templates/index" {
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/history": typeof HistoryIndexRoute;
-  "/prompt": typeof PromptIndexRoute;
+  "/optimizer": typeof OptimizerIndexRoute;
   "/templates": typeof TemplatesIndexRoute;
 }
 
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/history": typeof HistoryIndexRoute;
-  "/prompt": typeof PromptIndexRoute;
+  "/optimizer": typeof OptimizerIndexRoute;
   "/templates": typeof TemplatesIndexRoute;
 }
 
@@ -138,30 +138,30 @@ export interface FileRoutesById {
   __root__: typeof rootRoute;
   "/": typeof IndexRoute;
   "/history/": typeof HistoryIndexRoute;
-  "/prompt/": typeof PromptIndexRoute;
+  "/optimizer/": typeof OptimizerIndexRoute;
   "/templates/": typeof TemplatesIndexRoute;
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/" | "/history" | "/prompt" | "/templates";
+  fullPaths: "/" | "/history" | "/optimizer" | "/templates";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/history" | "/prompt" | "/templates";
-  id: "__root__" | "/" | "/history/" | "/prompt/" | "/templates/";
+  to: "/" | "/history" | "/optimizer" | "/templates";
+  id: "__root__" | "/" | "/history/" | "/optimizer/" | "/templates/";
   fileRoutesById: FileRoutesById;
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   HistoryIndexRoute: typeof HistoryIndexRoute;
-  PromptIndexRoute: typeof PromptIndexRoute;
+  OptimizerIndexRoute: typeof OptimizerIndexRoute;
   TemplatesIndexRoute: typeof TemplatesIndexRoute;
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HistoryIndexRoute: HistoryIndexRoute,
-  PromptIndexRoute: PromptIndexRoute,
+  OptimizerIndexRoute: OptimizerIndexRoute,
   TemplatesIndexRoute: TemplatesIndexRoute,
 };
 
@@ -177,7 +177,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/history/",
-        "/prompt/",
+        "/optimizer/",
         "/templates/"
       ]
     },
@@ -187,8 +187,8 @@ export const routeTree = rootRoute
     "/history/": {
       "filePath": "history/index.tsx"
     },
-    "/prompt/": {
-      "filePath": "prompt/index.tsx"
+    "/optimizer/": {
+      "filePath": "optimizer/index.tsx"
     },
     "/templates/": {
       "filePath": "templates/index.tsx"

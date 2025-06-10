@@ -239,20 +239,20 @@ export function PromptOptimizer({ templates }) {
             <div className="border rounded-md p-4 min-h-[400px] bg-gray-50">
               {isOptimizing
                 ? (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-center space-y-2">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
-                      <p className="text-muted-foreground">正在優化您的提示詞...</p>
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center space-y-2">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
+                        <p className="text-muted-foreground">正在優化您的提示詞...</p>
+                      </div>
                     </div>
-                  </div>
-                )
+                  )
                 : optimizedResult
                   ? (
-                    <div className="whitespace-pre-wrap text-sm">{optimizedResult}</div>
-                  )
+                      <div className="whitespace-pre-wrap text-sm">{optimizedResult}</div>
+                    )
                   : (
-                    <p className="text-muted-foreground">優化後的提示詞將顯示在這裡...</p>
-                  )}
+                      <p className="text-muted-foreground">優化後的提示詞將顯示在這裡...</p>
+                    )}
             </div>
 
             <div className="flex gap-2 mt-4 justify-end">
