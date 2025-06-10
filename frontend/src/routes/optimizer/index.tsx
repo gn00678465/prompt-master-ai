@@ -6,11 +6,11 @@ import { Button } from '@/components/ui/button'
 
 // 預設模板資料
 export const defaultTemplates = [
-  { id: 1, name: '預設模板', description: '通用優化模板', isDefault: true, category: 'general' },
-  { id: 2, name: '普通模板', description: '基本優化模板', isDefault: true, category: 'general' },
-  { id: 3, name: '擴展模板', description: '詳細優化模板', isDefault: true, category: 'general' },
-  { id: 4, name: '內容創作模板', description: '適用於文章、故事等創作', isDefault: true, category: 'content' },
-  { id: 5, name: '程式碼生成模板', description: '適用於程式碼生成', isDefault: true, category: 'code' },
+  { template_id: 1, name: '預設模板', description: '通用優化模板', is_default: true, category: 'general' },
+  { template_id: 2, name: '普通模板', description: '基本優化模板', is_default: true, category: 'general' },
+  { template_id: 3, name: '擴展模板', description: '詳細優化模板', is_default: true, category: 'general' },
+  { template_id: 4, name: '內容創作模板', description: '適用於文章、故事等創作', is_default: true, category: 'content' },
+  { template_id: 5, name: '程式碼生成模板', description: '適用於程式碼生成', is_default: true, category: 'code' },
 ]
 
 function PromptMasterAI() {
