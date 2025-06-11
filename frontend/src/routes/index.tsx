@@ -1,9 +1,12 @@
 import type React from 'react'
 import type { SubmitHandler } from 'react-hook-form'
 
+import { zodResolver } from '@hookform/resolvers/zod'
+import { } from '@tanstack/react-router'
 import { Eye, EyeOff, Lightbulb } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import * as z from 'zod'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -15,18 +18,37 @@ export const Route = createFileRoute({
   component: AuthPage,
 })
 
-// 定義表單型別
-interface LoginFormData {
-  username: string
-  password: string
-}
+// 定義 Zod 驗證 schema
+const loginSchema = z.object({
+  username: z.string()
+    .min(1, '用戶名不能為空')
+    .max(20, '用戶名不能超過 20 個字元'),
+  password: z.string()
+    .min(6, '密碼至少需要 6 個字元')
+    .max(100, '密碼不能超過 100 個字元'),
+})
 
-interface RegisterFormData {
-  username: string
-  email: string
-  password: string
-  confirmPassword: string
-}
+const registerSchema = z.object({
+  username: z.string()
+    .min(1, '用戶名不能為空')
+    .max(20, '用戶名不能超過 20 個字元')
+    .regex(/^\w+$/, '用戶名只能包含字母、數字和下劃線'),
+  email: z.string()
+    .email('請輸入有效的電子郵件地址')
+    .max(255, '電子郵件地址過長'),
+  password: z.string()
+    .min(8, '密碼至少需要 8 個字元')
+    .max(100, '密碼不能超過 100 個字元')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, '密碼必須包含大小寫字母和數字'),
+  confirmPassword: z.string(),
+}).refine(data => data.password === data.confirmPassword, {
+  message: '密碼確認不匹配',
+  path: ['confirmPassword'],
+})
+
+// 定義表單型別
+type LoginFormData = z.infer<typeof loginSchema>
+type RegisterFormData = z.infer<typeof registerSchema>
 
 function AuthPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -40,7 +62,9 @@ function AuthPage() {
     register: loginRegister,
     handleSubmit: loginHandleSubmit,
     formState: { errors: loginErrors },
+    reset: loginReset,
   } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       username: '',
       password: '',
@@ -51,9 +75,10 @@ function AuthPage() {
   const {
     register: registerRegister,
     handleSubmit: registerHandleSubmit,
-    watch: registerWatch,
     formState: { errors: registerErrors },
+    reset: registerReset,
   } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       username: '',
       email: '',
@@ -130,7 +155,24 @@ function AuthPage() {
             <CardTitle className="text-center">歡迎使用</CardTitle>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="login" className="w-full">
+            <Tabs
+              defaultValue="login"
+              className="w-full"
+              onValueChange={(value) => {
+                // 重置表單和狀態
+                setError('')
+                setSuccess('')
+                setShowPassword(false)
+                setShowConfirmPassword(false)
+
+                if (value === 'login') {
+                  loginReset()
+                }
+                else if (value === 'register') {
+                  registerReset()
+                }
+              }}
+            >
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">登入</TabsTrigger>
                 <TabsTrigger value="register">註冊</TabsTrigger>
@@ -156,11 +198,9 @@ function AuthPage() {
                     <Input
                       id="login-username"
                       type="text"
-                      {...loginRegister('username', {
-                        required: '請輸入用戶名',
-                        minLength: { value: 3, message: '用戶名至少需要 3 個字元' },
-                      })}
+                      {...loginRegister('username')}
                       placeholder="輸入您的用戶名"
+                      aria-invalid={!!loginErrors.username}
                     />
                     {loginErrors.username && (
                       <p className="text-sm text-red-600">{loginErrors.username.message}</p>
@@ -173,11 +213,9 @@ function AuthPage() {
                       <Input
                         id="login-password"
                         type={showPassword ? 'text' : 'password'}
-                        {...loginRegister('password', {
-                          required: '請輸入密碼',
-                          minLength: { value: 6, message: '密碼至少需要 6 個字元' },
-                        })}
+                        {...loginRegister('password')}
                         placeholder="輸入您的密碼"
+                        aria-invalid={!!loginErrors.password}
                       />
                       <Button
                         type="button"
@@ -208,11 +246,9 @@ function AuthPage() {
                     <Input
                       id="register-username"
                       type="text"
-                      {...registerRegister('username', {
-                        required: '請輸入用戶名',
-                        minLength: { value: 3, message: '用戶名至少需要 3 個字元' },
-                      })}
+                      {...registerRegister('username')}
                       placeholder="選擇一個用戶名"
+                      aria-invalid={!!registerErrors.username}
                     />
                     {registerErrors.username && (
                       <p className="text-sm text-red-600">{registerErrors.username.message}</p>
@@ -224,14 +260,9 @@ function AuthPage() {
                     <Input
                       id="register-email"
                       type="email"
-                      {...registerRegister('email', {
-                        required: '請輸入電子郵件',
-                        pattern: {
-                          value: /^[\w.%+-]+@[\w.-]+\.[A-Z]{2,}$/i,
-                          message: '請輸入有效的電子郵件地址',
-                        },
-                      })}
+                      {...registerRegister('email')}
                       placeholder="輸入您的電子郵件"
+                      aria-invalid={!!registerErrors.email}
                     />
                     {registerErrors.email && (
                       <p className="text-sm text-red-600">{registerErrors.email.message}</p>
@@ -244,11 +275,9 @@ function AuthPage() {
                       <Input
                         id="register-password"
                         type={showPassword ? 'text' : 'password'}
-                        {...registerRegister('password', {
-                          required: '請輸入密碼',
-                          minLength: { value: 8, message: '密碼至少需要 8 個字元' },
-                        })}
+                        {...registerRegister('password')}
                         placeholder="至少 8 個字元"
+                        aria-invalid={!!registerErrors.password}
                       />
                       <Button
                         type="button"
@@ -271,14 +300,9 @@ function AuthPage() {
                       <Input
                         id="register-confirm-password"
                         type={showConfirmPassword ? 'text' : 'password'}
-                        {...registerRegister('confirmPassword', {
-                          required: '請確認密碼',
-                          validate: (value) => {
-                            const password = registerWatch('password')
-                            return value === password || '密碼確認不匹配'
-                          },
-                        })}
+                        {...registerRegister('confirmPassword')}
                         placeholder="再次輸入密碼"
+                        aria-invalid={!!registerErrors.confirmPassword}
                       />
                       <Button
                         type="button"
