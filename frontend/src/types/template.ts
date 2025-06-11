@@ -9,3 +9,10 @@ export interface Template {
 }
 
 export type Templates = Array<Template>
+
+export interface TemplatePayload {
+  name: string
+  description?: string
+  category: string
+  content: string
+}
