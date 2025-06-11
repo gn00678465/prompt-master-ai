@@ -73,7 +73,7 @@ function TemplatesPage() {
   const filteredTemplates = templates.filter((template) => {
     const matchesSearch
       = template.name.toLowerCase().includes(searchQuery.toLowerCase())
-      || template.description.toLowerCase().includes(searchQuery.toLowerCase())
+        || template.description.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = activeCategory === 'all' || template.category === activeCategory
 
     return matchesSearch && matchesCategory
@@ -204,20 +204,20 @@ function TemplatesPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {defaultFilteredTemplates.length > 0
                       ? (
-                        defaultFilteredTemplates.map(template => (
-                          <TemplateCard
-                            key={template.id}
-                            template={template}
-                            onEdit={handleEditTemplate}
-                            onDelete={deleteTemplate}
-                          />
-                        ))
-                      )
+                          defaultFilteredTemplates.map(template => (
+                            <TemplateCard
+                              key={template.id}
+                              template={template}
+                              onEdit={handleEditTemplate}
+                              onDelete={deleteTemplate}
+                            />
+                          ))
+                        )
                       : (
-                        <div className="col-span-full text-center py-4 text-muted-foreground">
-                          沒有找到符合條件的預設模板
-                        </div>
-                      )}
+                          <div className="col-span-full text-center py-4 text-muted-foreground">
+                            沒有找到符合條件的預設模板
+                          </div>
+                        )}
                   </div>
                 </div>
               </TabsContent>
@@ -226,20 +226,20 @@ function TemplatesPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {customFilteredTemplates.length > 0
                     ? (
-                      customFilteredTemplates.map(template => (
-                        <TemplateCard
-                          key={template.id}
-                          template={template}
-                          onEdit={handleEditTemplate}
-                          onDelete={deleteTemplate}
-                        />
-                      ))
-                    )
+                        customFilteredTemplates.map(template => (
+                          <TemplateCard
+                            key={template.id}
+                            template={template}
+                            onEdit={handleEditTemplate}
+                            onDelete={deleteTemplate}
+                          />
+                        ))
+                      )
                     : (
-                      <div className="col-span-full text-center py-8 text-muted-foreground">
-                        沒有找到自定義模板，點擊「新增模板」按鈕創建一個
-                      </div>
-                    )}
+                        <div className="col-span-full text-center py-8 text-muted-foreground">
+                          沒有找到自定義模板，點擊「新增模板」按鈕創建一個
+                        </div>
+                      )}
                 </div>
               </TabsContent>
             </Tabs>
