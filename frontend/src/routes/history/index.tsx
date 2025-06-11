@@ -1,4 +1,4 @@
-import { ArrowLeft, Calendar, Clock, Copy, Lightbulb, RotateCcw, Search, Trash2 } from 'lucide-react'
+import { ArrowLeftIcon, Calendar, Clock, Copy, Lightbulb, RotateCcw, Search, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -61,8 +61,8 @@ function HistoryPage() {
     .filter((item) => {
       const matchesSearch
         = item.original_prompt.toLowerCase().includes(searchQuery.toLowerCase())
-          || item.optimized_prompt.toLowerCase().includes(searchQuery.toLowerCase())
-          || item.template_used.name.toLowerCase().includes(searchQuery.toLowerCase())
+        || item.optimized_prompt.toLowerCase().includes(searchQuery.toLowerCase())
+        || item.template_used.name.toLowerCase().includes(searchQuery.toLowerCase())
 
       const matchesModel = selectedModel === 'all' || item.model_used === selectedModel
       const matchesTemplate = selectedTemplate === 'all' || item.template_used.name === selectedTemplate
@@ -104,11 +104,12 @@ function HistoryPage() {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-6">
-        <Button
-          variant="ghost"
-          className="flex items-center gap-2 text-emerald-600 hover:text-emerald-700"
-        >
-          <ArrowLeft className="h-4 w-4" />
+        <Button className="group cursor-pointer" variant="ghost">
+          <ArrowLeftIcon
+            className="-ms-1 opacity-60 transition-transform group-hover:-translate-x-0.5"
+            size={16}
+            aria-hidden="true"
+          />
           返回
         </Button>
         <h1 className="text-2xl font-bold text-emerald-600 flex items-center gap-2">
@@ -180,99 +181,99 @@ function HistoryPage() {
           <div className="space-y-4">
             {filteredHistory.length > 0
               ? (
-                  filteredHistory.map(item => (
-                    <Card key={item.history_id} className="border-l-4 border-l-emerald-500">
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-emerald-600 border-emerald-600">
-                              {item.template_used.name}
-                            </Badge>
-                            <Badge variant="secondary">{item.model_used}</Badge>
-                            <span className="text-sm text-muted-foreground">
-                              溫度:
-                              {item.temperature}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Calendar className="h-4 w-4" />
-                            {formatDate(item.created_at)}
-                          </div>
+                filteredHistory.map(item => (
+                  <Card key={item.history_id} className="border-l-4 border-l-emerald-500">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-emerald-600 border-emerald-600">
+                            {item.template_used.name}
+                          </Badge>
+                          <Badge variant="secondary">{item.model_used}</Badge>
+                          <span className="text-sm text-muted-foreground">
+                            溫度:
+                            {item.temperature}
+                          </span>
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <Tabs defaultValue="comparison" className="w-full">
-                          <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="comparison">對比檢視</TabsTrigger>
-                            <TabsTrigger value="optimized">優化結果</TabsTrigger>
-                          </TabsList>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Calendar className="h-4 w-4" />
+                          {formatDate(item.created_at)}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <Tabs defaultValue="comparison" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                          <TabsTrigger value="comparison">對比檢視</TabsTrigger>
+                          <TabsTrigger value="optimized">優化結果</TabsTrigger>
+                        </TabsList>
 
-                          <TabsContent value="comparison" className="mt-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <h4 className="font-medium text-sm text-muted-foreground mb-2">原始提示詞</h4>
-                                <div className="p-3 bg-gray-50 rounded-md text-sm">{item.original_prompt}</div>
-                              </div>
-                              <div>
-                                <h4 className="font-medium text-sm text-muted-foreground mb-2">優化後提示詞</h4>
-                                <div className="p-3 bg-emerald-50 rounded-md text-sm max-h-32 overflow-y-auto">
-                                  {item.optimized_prompt}
-                                </div>
+                        <TabsContent value="comparison" className="mt-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <h4 className="font-medium text-sm text-muted-foreground mb-2">原始提示詞</h4>
+                              <div className="p-3 bg-gray-50 rounded-md text-sm">{item.original_prompt}</div>
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-sm text-muted-foreground mb-2">優化後提示詞</h4>
+                              <div className="p-3 bg-emerald-50 rounded-md text-sm max-h-32 overflow-y-auto">
+                                {item.optimized_prompt}
                               </div>
                             </div>
-                          </TabsContent>
+                          </div>
+                        </TabsContent>
 
-                          <TabsContent value="optimized" className="mt-4">
-                            <div className="p-3 bg-emerald-50 rounded-md text-sm">{item.optimized_prompt}</div>
-                          </TabsContent>
-                        </Tabs>
+                        <TabsContent value="optimized" className="mt-4">
+                          <div className="p-3 bg-emerald-50 rounded-md text-sm">{item.optimized_prompt}</div>
+                        </TabsContent>
+                      </Tabs>
 
-                        <div className="flex gap-2 mt-4 justify-end">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => copyToClipboard(item.optimized_prompt)}
-                            className="flex items-center gap-1"
-                          >
-                            <Copy className="h-3 w-3" />
-                            複製
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => reusePrompt(item)}
-                            className="flex items-center gap-1 text-emerald-600 border-emerald-600 hover:bg-emerald-50"
-                          >
-                            <RotateCcw className="h-3 w-3" />
-                            重新使用
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex items-center gap-1 text-red-500 border-red-200 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                            刪除
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                )
+                      <div className="flex gap-2 mt-4 justify-end">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => copyToClipboard(item.optimized_prompt)}
+                          className="flex items-center gap-1"
+                        >
+                          <Copy className="h-3 w-3" />
+                          複製
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => reusePrompt(item)}
+                          className="flex items-center gap-1 text-emerald-600 border-emerald-600 hover:bg-emerald-50"
+                        >
+                          <RotateCcw className="h-3 w-3" />
+                          重新使用
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-1 text-red-500 border-red-200 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                          刪除
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )
               : (
-                  <div className="text-center py-12">
-                    <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-muted-foreground mb-2">沒有找到歷史記錄</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      {searchQuery || selectedModel !== 'all' || selectedTemplate !== 'all'
-                        ? '嘗試調整搜尋條件或篩選器'
-                        : '開始優化您的第一個提示詞吧！'}
-                    </p>
-                    <Button className="bg-emerald-600 hover:bg-emerald-700">
-                      開始優化
-                    </Button>
-                  </div>
-                )}
+                <div className="text-center py-12">
+                  <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-muted-foreground mb-2">沒有找到歷史記錄</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {searchQuery || selectedModel !== 'all' || selectedTemplate !== 'all'
+                      ? '嘗試調整搜尋條件或篩選器'
+                      : '開始優化您的第一個提示詞吧！'}
+                  </p>
+                  <Button className="bg-emerald-600 hover:bg-emerald-700">
+                    開始優化
+                  </Button>
+                </div>
+              )}
           </div>
         </CardContent>
       </Card>
