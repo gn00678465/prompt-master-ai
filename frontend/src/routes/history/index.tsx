@@ -1,3 +1,4 @@
+import { createFileRoute } from '@tanstack/react-router'
 import { ArrowLeftIcon, Calendar, Clock, Copy, Lightbulb, RotateCcw, Search, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
@@ -281,6 +282,6 @@ function HistoryPage() {
   )
 }
 
-export const Route = createFileRoute({
+export const Route = createFileRoute('/history/')({
   component: HistoryPage,
 })

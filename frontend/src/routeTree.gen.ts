@@ -8,117 +8,32 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import type { CreateFileRoute, FileRoutesByPath } from "@tanstack/react-router";
-
-// Import Routes
-
-import { Route as rootRoute } from "./routes/__root";
+import { Route as rootRouteImport } from "./routes/__root";
 import { Route as IndexRouteImport } from "./routes/index";
 import { Route as TemplatesIndexRouteImport } from "./routes/templates/index";
 import { Route as OptimizerIndexRouteImport } from "./routes/optimizer/index";
 import { Route as HistoryIndexRouteImport } from "./routes/history/index";
 
-// Create/Update Routes
-
 const IndexRoute = IndexRouteImport.update({
   id: "/",
   path: "/",
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any);
-
 const TemplatesIndexRoute = TemplatesIndexRouteImport.update({
   id: "/templates/",
   path: "/templates/",
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any);
-
 const OptimizerIndexRoute = OptimizerIndexRouteImport.update({
   id: "/optimizer/",
   path: "/optimizer/",
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any);
-
 const HistoryIndexRoute = HistoryIndexRouteImport.update({
   id: "/history/",
   path: "/history/",
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any);
-
-// Populate the FileRoutesByPath interface
-
-declare module "@tanstack/react-router" {
-  interface FileRoutesByPath {
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRoute;
-    };
-    "/history/": {
-      id: "/history/";
-      path: "/history";
-      fullPath: "/history";
-      preLoaderRoute: typeof HistoryIndexRouteImport;
-      parentRoute: typeof rootRoute;
-    };
-    "/optimizer/": {
-      id: "/optimizer/";
-      path: "/optimizer";
-      fullPath: "/optimizer";
-      preLoaderRoute: typeof OptimizerIndexRouteImport;
-      parentRoute: typeof rootRoute;
-    };
-    "/templates/": {
-      id: "/templates/";
-      path: "/templates";
-      fullPath: "/templates";
-      preLoaderRoute: typeof TemplatesIndexRouteImport;
-      parentRoute: typeof rootRoute;
-    };
-  }
-}
-
-// Add type-safety to the createFileRoute function across the route tree
-
-declare module "./routes/index" {
-  const createFileRoute: CreateFileRoute<
-    "/",
-    FileRoutesByPath["/"]["parentRoute"],
-    FileRoutesByPath["/"]["id"],
-    FileRoutesByPath["/"]["path"],
-    FileRoutesByPath["/"]["fullPath"]
-  >;
-}
-declare module "./routes/history/index" {
-  const createFileRoute: CreateFileRoute<
-    "/history/",
-    FileRoutesByPath["/history/"]["parentRoute"],
-    FileRoutesByPath["/history/"]["id"],
-    FileRoutesByPath["/history/"]["path"],
-    FileRoutesByPath["/history/"]["fullPath"]
-  >;
-}
-declare module "./routes/optimizer/index" {
-  const createFileRoute: CreateFileRoute<
-    "/optimizer/",
-    FileRoutesByPath["/optimizer/"]["parentRoute"],
-    FileRoutesByPath["/optimizer/"]["id"],
-    FileRoutesByPath["/optimizer/"]["path"],
-    FileRoutesByPath["/optimizer/"]["fullPath"]
-  >;
-}
-declare module "./routes/templates/index" {
-  const createFileRoute: CreateFileRoute<
-    "/templates/",
-    FileRoutesByPath["/templates/"]["parentRoute"],
-    FileRoutesByPath["/templates/"]["id"],
-    FileRoutesByPath["/templates/"]["path"],
-    FileRoutesByPath["/templates/"]["fullPath"]
-  >;
-}
-
-// Create and export the route tree
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
@@ -126,22 +41,19 @@ export interface FileRoutesByFullPath {
   "/optimizer": typeof OptimizerIndexRoute;
   "/templates": typeof TemplatesIndexRoute;
 }
-
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/history": typeof HistoryIndexRoute;
   "/optimizer": typeof OptimizerIndexRoute;
   "/templates": typeof TemplatesIndexRoute;
 }
-
 export interface FileRoutesById {
-  __root__: typeof rootRoute;
+  __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
   "/history/": typeof HistoryIndexRoute;
   "/optimizer/": typeof OptimizerIndexRoute;
   "/templates/": typeof TemplatesIndexRoute;
 }
-
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths: "/" | "/history" | "/optimizer" | "/templates";
@@ -150,12 +62,44 @@ export interface FileRouteTypes {
   id: "__root__" | "/" | "/history/" | "/optimizer/" | "/templates/";
   fileRoutesById: FileRoutesById;
 }
-
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   HistoryIndexRoute: typeof HistoryIndexRoute;
   OptimizerIndexRoute: typeof OptimizerIndexRoute;
   TemplatesIndexRoute: typeof TemplatesIndexRoute;
+}
+
+declare module "@tanstack/react-router" {
+  interface FileRoutesByPath {
+    "/": {
+      id: "/";
+      path: "/";
+      fullPath: "/";
+      preLoaderRoute: typeof IndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/templates/": {
+      id: "/templates/";
+      path: "/templates";
+      fullPath: "/templates";
+      preLoaderRoute: typeof TemplatesIndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/optimizer/": {
+      id: "/optimizer/";
+      path: "/optimizer";
+      fullPath: "/optimizer";
+      preLoaderRoute: typeof OptimizerIndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/history/": {
+      id: "/history/";
+      path: "/history";
+      fullPath: "/history";
+      preLoaderRoute: typeof HistoryIndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+  }
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -164,35 +108,6 @@ const rootRouteChildren: RootRouteChildren = {
   OptimizerIndexRoute: OptimizerIndexRoute,
   TemplatesIndexRoute: TemplatesIndexRoute,
 };
-
-export const routeTree = rootRoute
+export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>();
-
-/* ROUTE_MANIFEST_START
-{
-  "routes": {
-    "__root__": {
-      "filePath": "__root.tsx",
-      "children": [
-        "/",
-        "/history/",
-        "/optimizer/",
-        "/templates/"
-      ]
-    },
-    "/": {
-      "filePath": "index.tsx"
-    },
-    "/history/": {
-      "filePath": "history/index.tsx"
-    },
-    "/optimizer/": {
-      "filePath": "optimizer/index.tsx"
-    },
-    "/templates/": {
-      "filePath": "templates/index.tsx"
-    }
-  }
-}
-ROUTE_MANIFEST_END */

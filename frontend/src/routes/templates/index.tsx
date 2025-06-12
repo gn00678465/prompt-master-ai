@@ -1,3 +1,4 @@
+import { createFileRoute } from '@tanstack/react-router'
 import { ArrowLeftIcon, Edit, Plus, Search, Settings, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -35,7 +36,7 @@ interface SearchFormData {
   searchQuery: string
 }
 
-export const Route = createFileRoute({
+export const Route = createFileRoute('/templates/')({
   component: TemplatesPage,
 })
 

@@ -1,3 +1,4 @@
+import { createFileRoute } from '@tanstack/react-router'
 import type React from 'react'
 import type { SubmitHandler } from 'react-hook-form'
 
@@ -14,7 +15,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-export const Route = createFileRoute({
+export const Route = createFileRoute('/')({
   component: AuthPage,
 })
 
