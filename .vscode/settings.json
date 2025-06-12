@@ -136,7 +136,7 @@
             "source.organizeImports.ruff": "explicit"
         }
     },
-    "[typescript]": {
+    "[typescriptreact]": {
         // Disable the default formatter, use eslint instead
         "prettier.enable": false,
         "editor.formatOnSave": true,
