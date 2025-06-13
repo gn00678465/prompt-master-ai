@@ -1,10 +1,14 @@
 import type { SubmitHandler } from 'react-hook-form'
+import type { AuthLoginPayload, AuthRegisterPayload, AuthResponse } from '@/types/auth'
+import type { FetchError } from '@/utils/error'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { createFileRoute } from '@tanstack/react-router'
 
+import { useMutation } from '@tanstack/react-query'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Eye, EyeOff, Lightbulb } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import * as z from 'zod'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -12,6 +16,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useAuthStore } from '@/hooks/useAuthStore'
+import { useFetch } from '@/hooks/useFetch'
 
 export const Route = createFileRoute('/')({
   component: AuthPage,
@@ -52,9 +58,33 @@ type RegisterFormData = z.infer<typeof registerSchema>
 function AuthPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const { $fetch } = useFetch()
+  const updateAuthData = useAuthStore(state => state.updateAuthData)
+  const navigate = useNavigate()
+
+  const { mutate: mutateLogin, isPending: isLoginPending } = useMutation({
+    mutationKey: ['auth', 'login'],
+    mutationFn: async (data: AuthLoginPayload) => {
+      return $fetch<AuthResponse>('/api/v1/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+    },
+    onSuccess(data) {
+      updateAuthData(data)
+      navigate({ to: '/optimizer' })
+    },
+    onError(error: FetchError<{ detail: string }>) {
+      toast.error(error.data.detail, {
+        richColors: true,
+      })
+    },
+  })
 
   // 登入表單狀態
   const {
@@ -67,6 +97,28 @@ function AuthPage() {
     defaultValues: {
       username: '',
       password: '',
+    },
+  })
+
+  const { mutate: mutateRegister, isPending: isRegisterPending } = useMutation({
+    mutationKey: ['auth', 'register'],
+    mutationFn: async (data: AuthRegisterPayload) => {
+      return $fetch('/api/v1/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+    },
+    onSuccess(data) {
+      updateAuthData(data)
+      navigate({ to: '/optimizer' })
+    },
+    onError(error: FetchError<{ detail: string }>) {
+      toast.error(error.data.detail, {
+        richColors: true,
+      })
     },
   })
 
@@ -87,55 +139,13 @@ function AuthPage() {
   })
 
   // 處理登入
-  const handleLogin: SubmitHandler<LoginFormData> = async (_data) => {
-    setIsLoading(true)
-    setError('')
-
-    try {
-      // 這裡應該調用實際的 API
-      // console.log("Login attempt:", data)
-
-      // 模擬 API 調用
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      // 模擬成功登入
-      setSuccess('登入成功！正在跳轉...')
-      setTimeout(() => {
-        // router.push("/")
-      }, 1000)
-    }
-    catch {
-      setError('登入失敗，請檢查您的用戶名和密碼')
-    }
-    finally {
-      setIsLoading(false)
-    }
+  const handleLogin: SubmitHandler<LoginFormData> = (_data) => {
+    mutateLogin(_data)
   }
 
   // 處理註冊
   const handleRegister: SubmitHandler<RegisterFormData> = async (_data) => {
-    setIsLoading(true)
-    setError('')
-
-    try {
-      // 這裡應該調用實際的 API
-      // console.log("Register attempt:", data)
-
-      // 模擬 API 調用
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      // 模擬成功註冊
-      setSuccess('註冊成功！正在跳轉...')
-      setTimeout(() => {
-        // router.push("/")
-      }, 1000)
-    }
-    catch {
-      setError('註冊失敗，請稍後再試')
-    }
-    finally {
-      setIsLoading(false)
-    }
+    mutateRegister(_data)
   }
 
   return (
@@ -231,8 +241,8 @@ function AuthPage() {
                     )}
                   </div>
 
-                  <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700" disabled={isLoading}>
-                    {isLoading ? '登入中...' : '登入'}
+                  <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700" disabled={isLoginPending}>
+                    {isLoginPending ? '登入中...' : '登入'}
                   </Button>
                 </form>
               </TabsContent>
@@ -318,8 +328,8 @@ function AuthPage() {
                     )}
                   </div>
 
-                  <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700" disabled={isLoading}>
-                    {isLoading ? '註冊中...' : '註冊'}
+                  <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700" disabled={isRegisterPending}>
+                    {isRegisterPending ? '註冊中...' : '註冊'}
                   </Button>
                 </form>
               </TabsContent>
