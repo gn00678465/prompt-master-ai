@@ -1,4 +1,4 @@
-import type { Template, Templates } from '../types/template'
+import type { TemplateEntries, TemplateEntry } from '../types/template'
 import { Check, Search } from 'lucide-react'
 import { useState } from 'react'
 import { ListBox, ListBoxItem } from 'react-aria-components'
@@ -8,12 +8,12 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 export interface TemplateSelectorProps {
-  templates: Templates
-  selectedTemplateId: Template['template_id']
-  onSelectTemplate: (templateId: Template['template_id']) => void
+  templates: TemplateEntries
+  selectedTemplateId?: TemplateEntry['template_id']
+  onSelectTemplateId?: (templateId: TemplateEntry['template_id']) => void
 }
 
-export function TemplateSelector({ templates, selectedTemplateId, onSelectTemplate }: TemplateSelectorProps) {
+export function TemplateSelector({ templates, selectedTemplateId, onSelectTemplateId }: TemplateSelectorProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
 
@@ -21,14 +21,14 @@ export function TemplateSelector({ templates, selectedTemplateId, onSelectTempla
   const categories = ['all', ...new Set(templates.map(t => t.category))]
 
   // 過濾模板
-  const filteredTemplates = templates.filter((template) => {
-    const matchesSearch
-      = template.name.toLowerCase().includes(searchQuery.toLowerCase())
-        || template.description?.includes(searchQuery.toLowerCase())
-    const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory
+  // const filteredTemplates = templates.filter((template) => {
+  //   const matchesSearch
+  //     = template.name.toLowerCase().includes(searchQuery.toLowerCase())
+  //     || template.description?.includes(searchQuery.toLowerCase())
+  //   const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory
 
-    return matchesSearch && matchesCategory
-  })
+  //   return matchesSearch && matchesCategory
+  // })
 
   return (
     <div className="space-y-3">
@@ -68,41 +68,42 @@ export function TemplateSelector({ templates, selectedTemplateId, onSelectTempla
       </div>
 
       <Card className="border-dashed p-0">
-        <CardContent className="p-2">
+        <CardContent className="p-1">
           <ScrollArea className="h-[180px] pr-3">
             <ListBox
               className="bg-background space-y-1 p-1 text-sm transition-[color,box-shadow]"
-              aria-label="Select framework"
+              aria-label="Select template"
               selectionMode="single"
-              defaultSelectedKeys={[2]}
+              selectedKeys={[selectedTemplateId || 0]}
+              onSelectionChange={(keys) => {
+                const key = Array.from(keys)[0]
+                if (key) {
+                  onSelectTemplateId?.(key as TemplateEntry['template_id'])
+                }
+              }}
             >
-              {filteredTemplates.length > 0
-                ? (
-                    filteredTemplates.map(template => (
-                      <ListBoxItem
-                        key={template.template_id}
-                        className={`flex items-center justify-between data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground data-focus-visible:border-ring data-focus-visible:ring-ring/50 relative rounded px-2 py-1.5 outline-none data-disabled:cursor-not-allowed data-disabled:opacity-50 data-focus-visible:ring-[3px] ${selectedTemplateId === template.template_id ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : ''
-                        }`}
-                        textValue={template.name}
-                      >
-                        <div className="flex items-start gap-2 flex-1">
-                          <div>
-                            <div className="font-medium">{template.name}</div>
-                            <div className="text-xs text-muted-foreground">{template.description}</div>
-                            {template.is_default && (
-                              <Badge variant="outline" className="mt-1 text-xs">
-                                預設
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                        {selectedTemplateId === template.template_id && <Check className="h-4 w-4 text-emerald-600 shrink-0 ml-2" />}
-                      </ListBoxItem>
-                    ))
-                  )
-                : (
-                    <div className="text-center py-8 text-muted-foreground">沒有找到符合條件的模板</div>
-                  )}
+              {templates.map(template => (
+                <ListBoxItem
+                  key={template.template_id}
+                  id={template.template_id}
+                  className={`w-full flex items-center px-3 rounded-lg transition-colors duration-300 justify-between text-left h-auto py-3 ${selectedTemplateId === template.template_id ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : ''
+                    }`}
+                  textValue={template.name}
+                >
+                  <div className="flex items-start gap-2 flex-1">
+                    <div>
+                      <div className="font-medium">{template.name}</div>
+                      <div className="text-xs text-muted-foreground">{template.description}</div>
+                      {template.is_default && (
+                        <Badge variant="outline" className="mt-1 text-xs">
+                          預設
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  {selectedTemplateId === template.template_id && <Check className="h-4 w-4 text-emerald-600 shrink-0 ml-2" />}
+                </ListBoxItem>
+              ))}
             </ListBox>
           </ScrollArea>
         </CardContent>

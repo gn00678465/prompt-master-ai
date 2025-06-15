@@ -8,7 +8,7 @@ interface ApiKeyInputProps {
   onChange?: (value: string) => void
 }
 
-export function ApiKeyInput({ ref, value, onChange }: ApiKeyInputProps & { ref?: React.RefObject<HTMLInputElement | null> }) {
+export function ApiKeyInput({ ref, value, onChange }: ApiKeyInputProps & { ref?: React.Ref<HTMLInputElement | null> }) {
   const [isExpanded, setIsExpanded] = useState(true)
 
   return (

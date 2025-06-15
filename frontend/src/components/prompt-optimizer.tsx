@@ -1,6 +1,12 @@
+import type { ModelEntries } from '@/types/model'
+import type { OptimizePayload } from '@/types/optimize'
+import type { TemplateEntries } from '@/types/template'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Link } from '@tanstack/react-router'
 import { Copy, Edit, Lightbulb, Settings, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
+import z from 'zod'
 import { ApiKeyInput } from '@/components/api-key-input'
 import { TemplateSelector } from '@/components/template-selector'
 import { Button } from '@/components/ui/button'
@@ -9,61 +15,40 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider'
 import { Textarea } from '@/components/ui/textarea'
 
-interface OptimizationFormData {
+type OptimizationFormData = OptimizePayload & {
   apiKey: string
-  templateId: number
-  model: string
-  temperature: number
-  originalPrompt: string
 }
 
-export function PromptOptimizer({ templates }) {
+interface PromptOptimizerProps {
+  templates?: TemplateEntries
+  models?: ModelEntries
+  isLoading?: boolean
+  onSubmit?: (data: OptimizationFormData) => void | Promise<void>
+}
+
+const schema = z.object({
+  template_id: z.number(),
+  model: z.string().min(1, '請選擇一個模型'),
+  temperature: z.number().min(0, '溫度不能小於 0').max(1, '溫度不能大於 1'),
+  original_prompt: z.string().min(1, '提示詞為必填項目'),
+  apiKey: z.string().min(1, 'API 金鑰為必填項目'),
+})
+
+function defaultOnSubmit() { }
+
+export function PromptOptimizer({ templates, models, isLoading = false, onSubmit = defaultOnSubmit }: PromptOptimizerProps) {
   const [optimizedResult, setOptimizedResult] = useState('')
-  const [isOptimizing, setIsOptimizing] = useState(false)
 
   const { control, handleSubmit, formState: { errors }, reset } = useForm<OptimizationFormData>({
     defaultValues: {
-      apiKey: '',
-      templateId: 1,
-      model: 'gemini-2.5-pro',
+      template_id: 0,
+      model: '',
       temperature: 0.1,
-      originalPrompt: '',
+      original_prompt: '',
+      apiKey: '',
     },
+    resolver: zodResolver(schema),
   })
-
-  const onSubmit = async (data: OptimizationFormData) => {
-    setIsOptimizing(true)
-    try {
-      // Mock API call - replace with actual API integration
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      const mockResult = `優化後的提示詞：
-
-根據所選模板和設定，您的原始提示詞已被優化如下：
-
-原始提示詞：${data.originalPrompt}
-
-優化建議：
-1. 增加更具體的上下文描述
-2. 明確定義期望的輸出格式
-3. 添加相關的約束條件和範例
-
-優化後的提示詞：
-請以${data.model}的角色，根據以下要求進行回應...
-
-[此處為完整的優化提示詞內容]
-
-使用溫度：${data.temperature}
-選用模板：${templates.find(t => t.id === data.templateId)?.name || '未知模板'}`
-
-      setOptimizedResult(mockResult)
-    }
-    catch (error) {
-      console.error('優化失敗:', error)
-    }
-    finally {
-      setIsOptimizing(false)
-    }
-  }
 
   const handleCopyResult = () => {
     navigator.clipboard.writeText(optimizedResult)
@@ -112,19 +97,22 @@ export function PromptOptimizer({ templates }) {
                   variant="outline"
                   size="sm"
                   className="h-8 flex items-center gap-1 border-emerald-600 text-emerald-600 hover:bg-emerald-50"
+                  asChild={true}
                 >
-                  <Settings className="h-3.5 w-3.5" />
-                  模板管理
+                  <Link to="/templates">
+                    <Settings className="h-3.5 w-3.5" />
+                    模板管理
+                  </Link>
                 </Button>
               </div>
               <Controller
-                name="templateId"
+                name="template_id"
                 control={control}
                 render={({ field }) => (
                   <TemplateSelector
-                    templates={templates}
+                    templates={templates || []}
                     selectedTemplateId={field.value}
-                    onSelectTemplate={field.onChange}
+                    onSelectTemplateId={field.onChange}
                   />
                 )}
               />
@@ -138,17 +126,28 @@ export function PromptOptimizer({ templates }) {
                   control={control}
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger>
+                      <SelectTrigger aria-invalid={!!errors.model}>
                         <SelectValue placeholder="選擇模型" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="gemini-2.5-pro">Gemini 2.5 Pro</SelectItem>
-                        <SelectItem value="gemini-1.5-pro">Gemini 1.5 Pro</SelectItem>
-                        <SelectItem value="gemini-1.0-pro">Gemini 1.0 Pro</SelectItem>
+                        {
+                          models?.length
+                            ? models.map(model => (
+                              <SelectItem key={model.name} value={model.name}>
+                                {model.displayName}
+                              </SelectItem>
+                            ))
+                            : (
+                              <SelectItem value="empty" disabled>無可用模型</SelectItem>
+                            )
+                        }
                       </SelectContent>
                     </Select>
                   )}
                 />
+                {errors.model && (
+                  <p className="text-sm text-red-500">{errors.model.message}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -159,7 +158,7 @@ export function PromptOptimizer({ templates }) {
                   render={({ field }) => (
                     <>
                       <Slider
-                        value={[field.value]}
+                        value={[field.value || 0]}
                         min={0}
                         max={1}
                         step={0.1}
@@ -184,7 +183,7 @@ export function PromptOptimizer({ templates }) {
                 原始提示詞
               </h3>
               <Controller
-                name="originalPrompt"
+                name="original_prompt"
                 control={control}
                 rules={{
                   required: '請輸入原始提示詞',
@@ -196,9 +195,10 @@ export function PromptOptimizer({ templates }) {
                       {...field}
                       placeholder="在此輸入您的原始提示詞..."
                       className="min-h-[150px]"
+                      aria-invalid={!!errors.original_prompt}
                     />
-                    {errors.originalPrompt && (
-                      <p className="text-sm text-red-500">{errors.originalPrompt.message}</p>
+                    {errors.original_prompt && (
+                      <p className="text-sm text-red-500">{errors.original_prompt.message}</p>
                     )}
                   </div>
                 )}
@@ -208,11 +208,11 @@ export function PromptOptimizer({ templates }) {
             <div className="flex gap-2">
               <Button
                 type="submit"
-                disabled={isOptimizing}
+                disabled={isLoading}
                 className="flex-1 bg-emerald-600 hover:bg-emerald-700 flex items-center justify-center gap-2"
               >
                 <Edit className="h-4 w-4" />
-                {isOptimizing ? '優化中...' : '優化提示詞'}
+                {isLoading ? '優化中...' : '優化提示詞'}
               </Button>
               <Button
                 type="button"
@@ -237,22 +237,22 @@ export function PromptOptimizer({ templates }) {
           </CardHeader>
           <CardContent>
             <div className="border rounded-md p-4 min-h-[400px] bg-gray-50">
-              {isOptimizing
+              {isLoading
                 ? (
-                    <div className="flex items-center justify-center h-full">
-                      <div className="text-center space-y-2">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
-                        <p className="text-muted-foreground">正在優化您的提示詞...</p>
-                      </div>
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center space-y-2">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
+                      <p className="text-muted-foreground">正在優化您的提示詞...</p>
                     </div>
-                  )
+                  </div>
+                )
                 : optimizedResult
                   ? (
-                      <div className="whitespace-pre-wrap text-sm">{optimizedResult}</div>
-                    )
+                    <div className="whitespace-pre-wrap text-sm">{optimizedResult}</div>
+                  )
                   : (
-                      <p className="text-muted-foreground">優化後的提示詞將顯示在這裡...</p>
-                    )}
+                    <p className="text-muted-foreground">優化後的提示詞將顯示在這裡...</p>
+                  )}
             </div>
 
             <div className="flex gap-2 mt-4 justify-end">

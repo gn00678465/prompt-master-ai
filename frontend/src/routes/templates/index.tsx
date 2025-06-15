@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowLeftIcon, Edit, Plus, Search, Settings, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -74,7 +74,7 @@ function TemplatesPage() {
   const filteredTemplates = templates.filter((template) => {
     const matchesSearch
       = template.name.toLowerCase().includes(searchQuery.toLowerCase())
-        || template.description.toLowerCase().includes(searchQuery.toLowerCase())
+      || template.description.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = activeCategory === 'all' || template.category === activeCategory
 
     return matchesSearch && matchesCategory
@@ -123,13 +123,15 @@ function TemplatesPage() {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-6">
-        <Button className="group cursor-pointer" variant="ghost">
-          <ArrowLeftIcon
-            className="-ms-1 opacity-60 transition-transform group-hover:-translate-x-0.5"
-            size={16}
-            aria-hidden="true"
-          />
-          返回
+        <Button className="group cursor-pointer" variant="ghost" asChild={true}>
+          <Link to="/">
+            <ArrowLeftIcon
+              className="-ms-1 opacity-60 transition-transform group-hover:-translate-x-0.5"
+              size={16}
+              aria-hidden="true"
+            />
+            返回
+          </Link>
         </Button>
         <h1 className="text-2xl font-bold text-emerald-600 flex items-center gap-2">
           <Settings className="h-6 w-6" />
@@ -205,29 +207,7 @@ function TemplatesPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {defaultFilteredTemplates.length > 0
                       ? (
-                          defaultFilteredTemplates.map(template => (
-                            <TemplateCard
-                              key={template.id}
-                              template={template}
-                              onEdit={handleEditTemplate}
-                              onDelete={deleteTemplate}
-                            />
-                          ))
-                        )
-                      : (
-                          <div className="col-span-full text-center py-4 text-muted-foreground">
-                            沒有找到符合條件的預設模板
-                          </div>
-                        )}
-                  </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="custom" className="mt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {customFilteredTemplates.length > 0
-                    ? (
-                        customFilteredTemplates.map(template => (
+                        defaultFilteredTemplates.map(template => (
                           <TemplateCard
                             key={template.id}
                             template={template}
@@ -236,11 +216,33 @@ function TemplatesPage() {
                           />
                         ))
                       )
-                    : (
-                        <div className="col-span-full text-center py-8 text-muted-foreground">
-                          沒有找到自定義模板，點擊「新增模板」按鈕創建一個
+                      : (
+                        <div className="col-span-full text-center py-4 text-muted-foreground">
+                          沒有找到符合條件的預設模板
                         </div>
                       )}
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="custom" className="mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {customFilteredTemplates.length > 0
+                    ? (
+                      customFilteredTemplates.map(template => (
+                        <TemplateCard
+                          key={template.id}
+                          template={template}
+                          onEdit={handleEditTemplate}
+                          onDelete={deleteTemplate}
+                        />
+                      ))
+                    )
+                    : (
+                      <div className="col-span-full text-center py-8 text-muted-foreground">
+                        沒有找到自定義模板，點擊「新增模板」按鈕創建一個
+                      </div>
+                    )}
                 </div>
               </TabsContent>
             </Tabs>

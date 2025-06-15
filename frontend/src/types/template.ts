@@ -1,4 +1,4 @@
-export interface Template {
+export interface TemplateEntry {
   template_id: number
   name: string
   description?: string
@@ -8,7 +8,7 @@ export interface Template {
   created_at: Date
 }
 
-export type Templates = Array<Template>
+export type TemplateEntries = Array<TemplateEntry>
 
 export interface TemplatePayload {
   name: string

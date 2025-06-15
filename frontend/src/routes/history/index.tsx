@@ -1,5 +1,5 @@
 import type { OptimizedHistory } from '@/types/history'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowLeftIcon, Calendar, Clock, Copy, Lightbulb, RotateCcw, Search, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
@@ -107,13 +107,15 @@ function HistoryPage() {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-6">
-        <Button className="group cursor-pointer" variant="ghost">
-          <ArrowLeftIcon
-            className="-ms-1 opacity-60 transition-transform group-hover:-translate-x-0.5"
-            size={16}
-            aria-hidden="true"
-          />
-          返回
+        <Button className="group cursor-pointer" variant="ghost" asChild={true}>
+          <Link to="/">
+            <ArrowLeftIcon
+              className="-ms-1 opacity-60 transition-transform group-hover:-translate-x-0.5"
+              size={16}
+              aria-hidden="true"
+            />
+            返回
+          </Link>
         </Button>
         <h1 className="text-2xl font-bold text-emerald-600 flex items-center gap-2">
           <Clock className="h-6 w-6" />

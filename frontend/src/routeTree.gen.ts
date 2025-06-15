@@ -11,8 +11,8 @@
 import { Route as rootRouteImport } from "./routes/__root";
 import { Route as IndexRouteImport } from "./routes/index";
 import { Route as TemplatesIndexRouteImport } from "./routes/templates/index";
-import { Route as OptimizerIndexRouteImport } from "./routes/optimizer/index";
 import { Route as HistoryIndexRouteImport } from "./routes/history/index";
+import { Route as AuthIndexRouteImport } from "./routes/auth/index";
 
 const IndexRoute = IndexRouteImport.update({
   id: "/",
@@ -24,48 +24,48 @@ const TemplatesIndexRoute = TemplatesIndexRouteImport.update({
   path: "/templates/",
   getParentRoute: () => rootRouteImport,
 } as any);
-const OptimizerIndexRoute = OptimizerIndexRouteImport.update({
-  id: "/optimizer/",
-  path: "/optimizer/",
-  getParentRoute: () => rootRouteImport,
-} as any);
 const HistoryIndexRoute = HistoryIndexRouteImport.update({
   id: "/history/",
   path: "/history/",
   getParentRoute: () => rootRouteImport,
 } as any);
+const AuthIndexRoute = AuthIndexRouteImport.update({
+  id: "/auth/",
+  path: "/auth/",
+  getParentRoute: () => rootRouteImport,
+} as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
+  "/auth": typeof AuthIndexRoute;
   "/history": typeof HistoryIndexRoute;
-  "/optimizer": typeof OptimizerIndexRoute;
   "/templates": typeof TemplatesIndexRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
+  "/auth": typeof AuthIndexRoute;
   "/history": typeof HistoryIndexRoute;
-  "/optimizer": typeof OptimizerIndexRoute;
   "/templates": typeof TemplatesIndexRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
+  "/auth/": typeof AuthIndexRoute;
   "/history/": typeof HistoryIndexRoute;
-  "/optimizer/": typeof OptimizerIndexRoute;
   "/templates/": typeof TemplatesIndexRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/" | "/history" | "/optimizer" | "/templates";
+  fullPaths: "/" | "/auth" | "/history" | "/templates";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/history" | "/optimizer" | "/templates";
-  id: "__root__" | "/" | "/history/" | "/optimizer/" | "/templates/";
+  to: "/" | "/auth" | "/history" | "/templates";
+  id: "__root__" | "/" | "/auth/" | "/history/" | "/templates/";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
+  AuthIndexRoute: typeof AuthIndexRoute;
   HistoryIndexRoute: typeof HistoryIndexRoute;
-  OptimizerIndexRoute: typeof OptimizerIndexRoute;
   TemplatesIndexRoute: typeof TemplatesIndexRoute;
 }
 
@@ -85,13 +85,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof TemplatesIndexRouteImport;
       parentRoute: typeof rootRouteImport;
     };
-    "/optimizer/": {
-      id: "/optimizer/";
-      path: "/optimizer";
-      fullPath: "/optimizer";
-      preLoaderRoute: typeof OptimizerIndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
     "/history/": {
       id: "/history/";
       path: "/history";
@@ -99,13 +92,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof HistoryIndexRouteImport;
       parentRoute: typeof rootRouteImport;
     };
+    "/auth/": {
+      id: "/auth/";
+      path: "/auth";
+      fullPath: "/auth";
+      preLoaderRoute: typeof AuthIndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthIndexRoute: AuthIndexRoute,
   HistoryIndexRoute: HistoryIndexRoute,
-  OptimizerIndexRoute: OptimizerIndexRoute,
   TemplatesIndexRoute: TemplatesIndexRoute,
 };
 export const routeTree = rootRouteImport
