@@ -68,6 +68,9 @@ importers:
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      ofetch:
+        specifier: ^1.4.1
+        version: 1.4.1
       postcss:
         specifier: ^8.5.5
         version: 8.5.5
