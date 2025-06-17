@@ -86,7 +86,7 @@ export function TemplateSelector({ templates, selectedTemplateId, onSelectTempla
                 <ListBoxItem
                   key={template.template_id}
                   id={template.template_id}
-                  className={`w-full flex items-center px-3 rounded-lg transition-colors duration-300 justify-between text-left h-auto py-3 ${selectedTemplateId === template.template_id ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : ''
+                  className={`w-full flex items-center px-3 rounded-lg transition-colors duration-300 justify-between text-left h-auto py-3 ${selectedTemplateId === template.template_id ? 'bg-emerald-50 text-emerald-700 aria-[selected="true"]:hover:bg-emerald-100' : ''
                     }`}
                   textValue={template.name}
                 >

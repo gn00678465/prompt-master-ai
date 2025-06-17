@@ -1,36 +1,19 @@
+import type { TemplateEntry, TemplatePayload } from '@/types/template'
+import { useMutation } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowLeftIcon, Edit, Plus, Search, Settings, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { ArrowLeftIcon, Plus, Search, Settings } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { TemplateCard } from '@/components/template-card'
 import { TemplateForm } from '@/components/template-form'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-
-interface Template {
-  id: number
-  name: string
-  description: string
-  content?: string
-  category: string
-  isDefault: boolean
-}
-
-interface TemplateFormData {
-  name: string
-  description: string
-  content: string
-  category: string
-}
-
-interface TemplateCardProps {
-  template: Template
-  onEdit: (template: Template) => void
-  onDelete: (id: number) => void
-}
+import { useTemplateStore } from '@/stores/useTemplateStore'
+import { api } from '@/utils'
 
 interface SearchFormData {
   searchQuery: string
@@ -40,22 +23,22 @@ export const Route = createFileRoute('/templates/')({
   component: TemplatesPage,
 })
 
-// 預設模板資料
-const defaultTemplates = [
-  { id: 1, name: '預設模板', description: '通用優化模板', isDefault: true, category: 'general' },
-  { id: 2, name: '普通模板', description: '基本優化模板', isDefault: true, category: 'general' },
-  { id: 3, name: '擴展模板', description: '詳細優化模板', isDefault: true, category: 'general' },
-  { id: 4, name: '內容創作模板', description: '適用於文章、故事等創作', isDefault: true, category: 'content' },
-  { id: 5, name: '程式碼生成模板', description: '適用於程式碼生成', isDefault: true, category: 'code' },
-  { id: 6, name: '問題解決模板', description: '適用於問題分析和解決', isDefault: true, category: 'problem' },
-]
-
 function TemplatesPage() {
-  const [templates, setTemplates] = useState(defaultTemplates)
   const [isNewTemplateDialogOpen, setIsNewTemplateDialogOpen] = useState(false)
   const [isEditTemplateDialogOpen, setIsEditTemplateDialogOpen] = useState(false)
-  const [editingTemplate, setEditingTemplate] = useState<Template | null>(null)
+  const [isDeleteConfirmDialogOpen, setIsDeleteConfirmDialogOpen] = useState(false)
+  const [editingTemplate, setEditingTemplate] = useState<TemplateEntry | null>(null)
+  const [deletingTemplate, setDeletingTemplate] = useState<TemplateEntry | null>(null)
   const [activeCategory, setActiveCategory] = useState('all')
+  const templates = useTemplateStore(state => state.templates)
+  const fetchTemplates = useTemplateStore(state => state.fetch)
+  const pushTemplate = useTemplateStore(state => state.push)
+
+  useEffect(() => {
+    if (templates.length === 0) {
+      fetchTemplates()
+    }
+  })
 
   // React Hook Form 設定
   const searchForm = useForm<SearchFormData>({
@@ -65,59 +48,101 @@ function TemplatesPage() {
   })
 
   const { register, watch } = searchForm
-  const searchQuery = watch('searchQuery')
+  const _searchQuery = watch('searchQuery') // 暫時未使用，但保留以供未來搜尋功能
 
   // 獲取所有唯一的類別
   const categories = ['all', ...new Set(templates.map(t => t.category))]
 
-  // 過濾模板
-  const filteredTemplates = templates.filter((template) => {
-    const matchesSearch
-      = template.name.toLowerCase().includes(searchQuery.toLowerCase())
-      || template.description.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = activeCategory === 'all' || template.category === activeCategory
-
-    return matchesSearch && matchesCategory
-  })
-
   // 分類模板
-  const defaultFilteredTemplates = filteredTemplates.filter(t => t.isDefault)
-  const customFilteredTemplates = filteredTemplates.filter(t => !t.isDefault)
+  const defaultFilteredTemplates = templates.filter(t => t.is_default)
+  const customFilteredTemplates = templates.filter(t => !t.is_default)
 
   // 新增自定義模板
-  const addCustomTemplate = (template: TemplateFormData) => {
-    const newTemplateObj = {
-      id: templates.length + 1,
-      name: template.name,
-      description: template.description,
-      content: template.content,
-      category: template.category,
-      isDefault: false,
-    }
-    setTemplates([...templates, newTemplateObj])
-    setIsNewTemplateDialogOpen(false)
+  const addTemplateMutation = useMutation({
+    mutationKey: ['add', 'template'],
+    mutationFn: async (template: TemplatePayload) => {
+      const response = await api<TemplateEntry>('/api/v1/templates/', {
+        method: 'POST',
+        body: template,
+      })
+      return response
+    },
+  })
+
+  // 新增自定義模板
+  const addCustomTemplate = (template: TemplatePayload) => {
+    addTemplateMutation.mutate(template, {
+      onSuccess(data) {
+        pushTemplate(data)
+        setIsNewTemplateDialogOpen(false)
+      },
+    })
   }
 
   // 刪除模板
-  const deleteTemplate = (id: number) => {
-    setTemplates(templates.filter(template => template.id !== id))
+  const deleteTemplateMutation = useMutation({
+    mutationKey: ['delete', 'template'],
+    mutationFn: async (template_id: number) => {
+      await api(`/api/v1/templates/${template_id}`, {
+        method: 'DELETE',
+      })
+    },
+  })
+
+  // 顯示刪除確認對話框
+  const handleDeleteTemplate = (template: TemplateEntry) => {
+    setDeletingTemplate(template)
+    setIsDeleteConfirmDialogOpen(true)
+  }
+
+  // 確認刪除模板
+  const confirmDeleteTemplate = () => {
+    if (deletingTemplate) {
+      deleteTemplateMutation.mutate(deletingTemplate.template_id, {
+        onSuccess() {
+          // 刪除成功後重新獲取模板列表
+          fetchTemplates()
+          setIsDeleteConfirmDialogOpen(false)
+          setDeletingTemplate(null)
+        },
+      })
+    }
   }
 
   // 編輯模板
-  const handleEditTemplate = (template: Template) => {
+  const handleEditTemplate = (template: TemplateEntry) => {
     setEditingTemplate(template)
     setIsEditTemplateDialogOpen(true)
   }
 
   // 提交編輯
-  const handleSubmitEdit = (updatedTemplate: TemplateFormData) => {
-    setTemplates(
-      templates.map(template =>
-        template.id === editingTemplate!.id ? { ...template, ...updatedTemplate } : template,
-      ),
+  const editTemplateMutation = useMutation({
+    mutationKey: ['edit', 'template'],
+    mutationFn: async (template: TemplatePayload) => {
+      const response = await api<TemplateEntry>(`/api/v1/templates/${editingTemplate?.template_id}`, {
+        method: 'PUT',
+        body: template,
+      })
+      return response
+    },
+  })
+
+  // 提交編輯
+  const handleSubmitEdit = (updatedTemplate: TemplatePayload) => {
+    editTemplateMutation.mutate(
+      updatedTemplate,
+      {
+        onSuccess(data) {
+          // 更新模板列表
+          useTemplateStore.getState().replace(data, templates.findIndex(t => t.template_id === data.template_id))
+          setIsEditTemplateDialogOpen(false)
+          setEditingTemplate(null)
+        },
+        onError(error) {
+          console.error('編輯模板失敗:', error)
+        },
+      },
     )
-    setIsEditTemplateDialogOpen(false)
-    setEditingTemplate(null)
   }
 
   return (
@@ -149,9 +174,8 @@ function TemplatesPage() {
               <CardTitle className="text-lg">優化模板</CardTitle>
               <CardDescription>管理您的優化模板，創建自定義模板以滿足特定需求</CardDescription>
             </div>
-            <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => setIsNewTemplateDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              {' '}
+            <Button className="bg-emerald-600 hover:bg-emerald-700 cursor-pointer" onClick={() => setIsNewTemplateDialogOpen(true)}>
+              <Plus className="h-4 w-4" />
               新增模板
             </Button>
           </div>
@@ -209,10 +233,10 @@ function TemplatesPage() {
                       ? (
                         defaultFilteredTemplates.map(template => (
                           <TemplateCard
-                            key={template.id}
+                            key={template.template_id}
                             template={template}
                             onEdit={handleEditTemplate}
-                            onDelete={deleteTemplate}
+                            onDelete={handleDeleteTemplate}
                           />
                         ))
                       )
@@ -231,10 +255,10 @@ function TemplatesPage() {
                     ? (
                       customFilteredTemplates.map(template => (
                         <TemplateCard
-                          key={template.id}
+                          key={template.template_id}
                           template={template}
                           onEdit={handleEditTemplate}
-                          onDelete={deleteTemplate}
+                          onDelete={handleDeleteTemplate}
                         />
                       ))
                     )
@@ -282,40 +306,38 @@ function TemplatesPage() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
-  )
-}
 
-// 模板卡片組件
-function TemplateCard({ template, onEdit, onDelete }: TemplateCardProps) {
-  return (
-    <Card className="overflow-hidden">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-base">{template.name}</CardTitle>
-            <CardDescription className="line-clamp-2">{template.description}</CardDescription>
-          </div>
-          {template.isDefault && <Badge variant="outline">預設</Badge>}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="flex gap-2 mt-2">
-          <Button variant="outline" size="sm" className="flex-1">
-            使用
-          </Button>
-          {!template.isDefault && (
-            <>
-              <Button variant="outline" size="sm" onClick={() => onEdit(template)}>
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="sm" className="text-red-500" onClick={() => onDelete(template.id)}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+      {/* 刪除確認對話框 */}
+      <Dialog open={isDeleteConfirmDialogOpen} onOpenChange={setIsDeleteConfirmDialogOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>確認刪除模板</DialogTitle>
+            <DialogDescription>
+              您確定要刪除模板「
+              {deletingTemplate?.name}
+              」嗎？此操作無法復原。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsDeleteConfirmDialogOpen(false)
+                setDeletingTemplate(null)
+              }}
+            >
+              取消
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDeleteTemplate}
+              disabled={deleteTemplateMutation.isPending}
+            >
+              {deleteTemplateMutation.isPending ? '刪除中...' : '確定刪除'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   )
 }

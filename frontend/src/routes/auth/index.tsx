@@ -16,7 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useAuthStore } from '@/hooks/useAuthStore'
+import { useAuthStore } from '@/stores/useAuthStore'
 import { useFetch } from '@/hooks/useFetch'
 
 export const Route = createFileRoute('/auth/')({

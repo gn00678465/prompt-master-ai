@@ -1,20 +1,21 @@
 import type { ModelEntries } from '@/types/model'
-import type { TemplateEntries } from '@/types/template'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Clock, Lightbulb, User } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { FrequentlyAskedQuestions } from '@/components/frequently-asked-questions'
 import { PromptOptimizer } from '@/components/prompt-optimizer'
 import { Button } from '@/components/ui/button'
-import { useAuthStore } from '@/hooks/useAuthStore'
 import { useFetch } from '@/hooks/useFetch'
+import { useAuthStore } from '@/stores/useAuthStore'
+import { useTemplateStore } from '@/stores/useTemplateStore'
 
 function PromptMasterAI() {
-  const [templates, setTemplates] = useState<TemplateEntries>([])
   const [models, setModels] = useState<ModelEntries>([])
   const auth = useAuthStore(state => state.data)
   const isHydrated = useAuthStore(state => state.isHydrated)
   const { $fetch } = useFetch()
+  const fetchTemplates = useTemplateStore(state => state.fetch)
+  const templates = useTemplateStore(state => state.templates)
 
   useEffect(() => {
     // 只有在 Zustand 完成 hydration 且有 access_token 時才發送請求
@@ -23,24 +24,14 @@ function PromptMasterAI() {
     }
 
     Promise.allSettled([
-      $fetch<TemplateEntries>('/api/v1/templates/', {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${auth.access_token}`,
-        },
-      }),
+      fetchTemplates(),
       $fetch<ModelEntries>('/api/v1/models/models', {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${auth.access_token}`,
         },
       }),
-    ]).then(([templates, models]) => {
-      // 處理 templates 資料
-      if (templates.status === 'fulfilled') {
-        setTemplates(templates.value)
-      }
-
+    ]).then(([_, models]) => {
       // 處理 models 資料
       if (models.status === 'fulfilled') {
         setModels(models.value)
@@ -53,7 +44,7 @@ function PromptMasterAI() {
       <div className="flex justify-end gap-2 mb-4">
         <Button
           variant="outline"
-          className="flex items-center gap-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50"
+          className="flex items-center gap-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
           asChild={true}
         >
           <Link to="/history">
@@ -63,7 +54,7 @@ function PromptMasterAI() {
         </Button>
         <Button
           variant="outline"
-          className="flex items-center gap-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50"
+          className="flex items-center gap-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
           asChild={true}
         >
           <Link to="/auth">

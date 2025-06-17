@@ -96,7 +96,7 @@ export function PromptOptimizer({ templates, models, isLoading = false, onSubmit
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="h-8 flex items-center gap-1 border-emerald-600 text-emerald-600 hover:bg-emerald-50"
+                  className="h-8 flex items-center gap-1 border-emerald-600 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
                   asChild={true}
                 >
                   <Link to="/templates">
@@ -119,14 +119,14 @@ export function PromptOptimizer({ templates, models, isLoading = false, onSubmit
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+              <div className="space-y-2 w-full">
                 <h3 className="font-medium">使用模型</h3>
                 <Controller
                   name="model"
                   control={control}
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger aria-invalid={!!errors.model}>
+                      <SelectTrigger className="w-full" aria-invalid={!!errors.model}>
                         <SelectValue placeholder="選擇模型" />
                       </SelectTrigger>
                       <SelectContent>
@@ -145,6 +145,9 @@ export function PromptOptimizer({ templates, models, isLoading = false, onSubmit
                     </Select>
                   )}
                 />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Flash Lite 速度快，Flash 品質佳，Pro 品質最佳但最慢</span>
+                </div>
                 {errors.model && (
                   <p className="text-sm text-red-500">{errors.model.message}</p>
                 )}
@@ -235,25 +238,15 @@ export function PromptOptimizer({ templates, models, isLoading = false, onSubmit
               優化結果
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="border rounded-md p-4 min-h-[400px] bg-gray-50">
-              {isLoading
-                ? (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-center space-y-2">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
-                      <p className="text-muted-foreground">正在優化您的提示詞...</p>
-                    </div>
-                  </div>
-                )
-                : optimizedResult
-                  ? (
-                    <div className="whitespace-pre-wrap text-sm">{optimizedResult}</div>
-                  )
-                  : (
-                    <p className="text-muted-foreground">優化後的提示詞將顯示在這裡...</p>
-                  )}
-            </div>
+          {' '}
+          <CardContent className="flex-1 flex flex-col">
+            <Textarea
+              value={optimizedResult}
+              onChange={e => setOptimizedResult(e.target.value)}
+              placeholder="優化後的提示詞將顯示在這裡..."
+              className="min-h-[400px] text-sm bg-gray-50 flex-1"
+              readOnly={false}
+            />
 
             <div className="flex gap-2 mt-4 justify-end">
               <Button
