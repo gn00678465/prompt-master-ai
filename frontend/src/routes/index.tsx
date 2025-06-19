@@ -1,4 +1,6 @@
 import type { ModelEntries } from '@/types/model'
+import type { OptimizePayload, OptimizeResponse } from '@/types/optimize'
+import { useMutation } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Clock, Lightbulb, User } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -16,6 +18,19 @@ function PromptMasterAI() {
   const { $fetch } = useFetch()
   const fetchTemplates = useTemplateStore(state => state.fetch)
   const templates = useTemplateStore(state => state.templates)
+
+  const optimizeMutation = useMutation({
+    mutationKey: ['optimize'],
+    mutationFn: (data: OptimizePayload) => {
+      return $fetch<OptimizeResponse>('/api/v1/prompts/optimize', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${auth?.access_token}`,
+        },
+        body: data,
+      })
+    },
+  })
 
   useEffect(() => {
     // 只有在 Zustand 完成 hydration 且有 access_token 時才發送請求
@@ -38,6 +53,13 @@ function PromptMasterAI() {
       }
     })
   }, [auth, isHydrated, $fetch])
+
+  function onSubmit(data: OptimizePayload & {
+    apiKey: string
+  }) {
+    const { apiKey, ...other } = data
+    optimizeMutation.mutate(other)
+  }
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -77,7 +99,7 @@ function PromptMasterAI() {
 
       <div className="space-y-8">
         {/* 優化工具區塊 */}
-        <PromptOptimizer templates={templates} models={models} />
+        <PromptOptimizer templates={templates} models={models} isLoading={optimizeMutation.isPending} optimizedTemplate={optimizeMutation.data?.optimized_prompt} onSubmit={onSubmit} />
 
         {/* 常見問題區塊 */}
         <FrequentlyAskedQuestions />

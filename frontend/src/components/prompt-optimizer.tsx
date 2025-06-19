@@ -23,6 +23,7 @@ interface PromptOptimizerProps {
   templates?: TemplateEntries
   models?: ModelEntries
   isLoading?: boolean
+  optimizedTemplate?: string
   onSubmit?: (data: OptimizationFormData) => void | Promise<void>
 }
 
@@ -36,8 +37,11 @@ const schema = z.object({
 
 function defaultOnSubmit() { }
 
-export function PromptOptimizer({ templates, models, isLoading = false, onSubmit = defaultOnSubmit }: PromptOptimizerProps) {
-  const [optimizedResult, setOptimizedResult] = useState('')
+export function PromptOptimizer({ templates, models, optimizedTemplate = '', isLoading = false, onSubmit = defaultOnSubmit }: PromptOptimizerProps) {
+  const [localOptimizedResult, setLocalOptimizedResult] = useState('')
+
+  // 計算最終顯示的優化結果：優先使用 prop 傳入的值，否則使用本地狀態
+  const displayedResult = optimizedTemplate || localOptimizedResult
 
   const { control, handleSubmit, formState: { errors }, reset } = useForm<OptimizationFormData>({
     defaultValues: {
@@ -49,24 +53,23 @@ export function PromptOptimizer({ templates, models, isLoading = false, onSubmit
     },
     resolver: zodResolver(schema),
   })
-
   const handleCopyResult = () => {
-    navigator.clipboard.writeText(optimizedResult)
+    navigator.clipboard.writeText(displayedResult)
   }
 
   const handleClearResult = () => {
-    setOptimizedResult('')
+    setLocalOptimizedResult('')
   }
 
   const handleClearForm = () => {
     reset()
-    setOptimizedResult('')
+    setLocalOptimizedResult('')
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
+        <Card className="h-max-[1100px]">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2 text-emerald-600">
               <Edit className="h-5 w-5" />
@@ -197,7 +200,7 @@ export function PromptOptimizer({ templates, models, isLoading = false, onSubmit
                     <Textarea
                       {...field}
                       placeholder="在此輸入您的原始提示詞..."
-                      className="min-h-[150px]"
+                      className="min-h-[150px] max-h-[400px]"
                       aria-invalid={!!errors.original_prompt}
                     />
                     {errors.original_prompt && (
@@ -230,7 +233,7 @@ export function PromptOptimizer({ templates, models, isLoading = false, onSubmit
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="h-max-[1100px]">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2 text-emerald-600">
               <Lightbulb className="h-5 w-5" />
@@ -240,21 +243,23 @@ export function PromptOptimizer({ templates, models, isLoading = false, onSubmit
           </CardHeader>
           {' '}
           <CardContent className="flex-1 flex flex-col">
+            {' '}
             <Textarea
-              value={optimizedResult}
-              onChange={e => setOptimizedResult(e.target.value)}
+              value={displayedResult}
+              onChange={e => setLocalOptimizedResult(e.target.value)}
               placeholder="優化後的提示詞將顯示在這裡..."
-              className="min-h-[400px] text-sm bg-gray-50 flex-1"
+              className="min-h-[400px] max-h-[1046px] text-sm bg-gray-50 h-full"
               readOnly={false}
             />
 
             <div className="flex gap-2 mt-4 justify-end">
+              {' '}
               <Button
                 type="button"
                 variant="outline"
                 className="flex items-center gap-2"
                 onClick={handleCopyResult}
-                disabled={!optimizedResult}
+                disabled={!displayedResult}
               >
                 <Copy className="h-4 w-4" />
                 {' '}
@@ -265,7 +270,7 @@ export function PromptOptimizer({ templates, models, isLoading = false, onSubmit
                 variant="outline"
                 className="flex items-center gap-2"
                 onClick={handleClearResult}
-                disabled={!optimizedResult}
+                disabled={!displayedResult}
               >
                 <Trash2 className="h-4 w-4" />
                 {' '}
