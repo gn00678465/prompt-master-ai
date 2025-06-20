@@ -21,13 +21,12 @@
     },
     // Frontend: Next.js (Node.js)
     {
-      "name": "執行前端 (Next.js)",
+      "name": "執行前端",
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceFolder}/frontend",
-      "runtimeExecutable": "npm",
+      "runtimeExecutable": "pnpm",
       "runtimeArgs": [
-        "run",
         "dev"
       ],
       "console": "integratedTerminal"
