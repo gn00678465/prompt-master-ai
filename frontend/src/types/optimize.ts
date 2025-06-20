@@ -7,9 +7,9 @@ export interface OptimizePayload {
 }
 
 export interface OptimizeEntry {
-  optimized_prompt: 'string'
-  improvement_analysis: 'string'
-  original_prompt: 'string'
+  optimized_prompt: string
+  improvement_analysis: string
+  original_prompt: string
 }
 
 export type OptimizeResponse = OptimizeEntry
