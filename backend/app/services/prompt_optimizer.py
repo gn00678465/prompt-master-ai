@@ -5,7 +5,7 @@ Prompt 優化服務模組
 from sqlmodel import Session, select
 
 from app.models import PromptHistory, Template
-from app.schemas.prompt import PromptOptimizeRequest, PromptOptimizeResponse
+from app.schemas.optimize import PromptOptimizeRequest, PromptOptimizeResponse
 from app.services.gemini_client import GeminiClient
 
 

@@ -5,7 +5,7 @@ Prompt 相關 API 端點
 from fastapi import APIRouter, HTTPException, status
 
 from app.dependencies import OptionalVerifyUserDep, SessionDep
-from app.schemas.prompt import (
+from app.schemas.optimize import (
     PromptOptimizeRequest,
     PromptOptimizeResponse,
 )

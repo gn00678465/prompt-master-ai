@@ -350,6 +350,21 @@ Authorization: Bearer {token}
 ]
 ```
 
+#### `DELETE /api/prompts/history/{history_id}`
+刪除用戶的 Prompt 歷史記錄。
+
+**請求頭**：
+```
+Authorization: Bearer {token}
+```
+
+**回應（成功）**：
+```json
+{
+  "message": "Prompt history deleted successfully"
+}
+```
+
 ### 5.3 模板 API
 
 #### `GET /api/templates`
