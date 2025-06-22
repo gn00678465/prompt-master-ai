@@ -3,7 +3,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth_router, models_router, prompt_router, template_router
+from app.api import (
+    auth_router,
+    history_router,
+    models_router,
+    prompt_router,
+    template_router,
+)
 from app.dependencies import create_db_and_tables
 
 
@@ -36,6 +42,7 @@ app.include_router(
 app.include_router(prompt_router, prefix="/api")
 app.include_router(template_router, prefix="/api")
 app.include_router(models_router, prefix="/api")
+app.include_router(history_router, prefix="/api")
 
 
 @app.get("/")

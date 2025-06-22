@@ -8,7 +8,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import and_, or_, select
 
-from app.dependencies import CurrentUserDep, SessionDep
+from app.dependencies import OptionalVerifyUserDep, SessionDep, VerifyUserDep
 from app.models import Template
 from app.schemas.template import TemplateCreate, TemplateOut, TemplateUpdate
 
@@ -20,21 +20,28 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[TemplateOut])
-async def get_all_templates(data: CurrentUserDep, session: SessionDep):
+async def get_all_templates(data: OptionalVerifyUserDep, session: SessionDep):
     """
     獲取所有模板（包含用戶模板和預設模板）
+    當有 token 時：回傳用戶模板 + 預設模板
+    當無 token 時：只回傳預設模板
     """
-    user_id = data.user_id
-    # 查詢條件：用戶的模板 OR 預設模板
-    templates = session.exec(
-        select(Template).where(or_(Template.user_id == user_id, Template.is_default))
-    ).all()
+    if data is None:  # 未提供 token，只回傳預設模板
+        templates = session.exec(select(Template).where(Template.is_default)).all()
+    else:
+        # 提供 token 且驗證通過，回傳用戶模板 + 預設模板
+        user_id = data.user_id
+        templates = session.exec(
+            select(Template).where(
+                or_(Template.user_id == user_id, Template.is_default)
+            )
+        ).all()
     return templates
 
 
 @router.get("/{template_id}", response_model=TemplateOut)
 async def get_template_by_id(
-    data: CurrentUserDep, session: SessionDep, template_id: int
+    data: VerifyUserDep, session: SessionDep, template_id: int
 ):
     """
     根據模板 ID 獲取模板詳細資訊
@@ -61,7 +68,7 @@ async def get_template_by_id(
 
 @router.post("/")
 async def create_template(
-    data: CurrentUserDep, session: SessionDep, template: TemplateCreate
+    data: VerifyUserDep, session: SessionDep, template: TemplateCreate
 ):
     """
     建立新的模板
@@ -99,7 +106,7 @@ async def create_template(
 
 @router.put("/{template_id}")
 async def update_template(
-    data: CurrentUserDep,
+    data: VerifyUserDep,
     session: SessionDep,
     template_id: int,
     template: TemplateUpdate,
@@ -138,7 +145,7 @@ async def update_template(
 
 @router.delete("/{template_id}")
 async def delete_template(
-    data: CurrentUserDep,
+    data: VerifyUserDep,
     session: SessionDep,
     template_id: int,
 ):

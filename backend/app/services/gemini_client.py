@@ -2,12 +2,11 @@
 Google Gemini API 客戶端
 """
 
+from enum import Enum
 import logging
 
 from google import genai
 from google.genai import types
-
-from app.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -24,21 +23,20 @@ class GeminiClient:
 
     def __init__(
         self,
-        api_key: str | None = None,
+        api_key: str,
     ):
         """初始化 Gemini API 客戶端
 
         Args:
-            api_key: API 密鑰，如果未提供則從設定中讀取
-            retry_delay: 重試延遲時間（秒）
+            api_key: API 密鑰（必需參數）
         """
+        if not api_key:
+            raise ValueError("API 密鑰不能為空")
+
         self.api_key = api_key
         self._client = None
         self.default_temperature = 0.2
         self.default_max_output_tokens = 2048
-
-        if not self.api_key:
-            raise ValueError("GEMINI_API_KEY environment variable is not set.")
 
     @property
     def client(self) -> genai.Client:
@@ -102,9 +100,7 @@ class GeminiClient:
             max_output_tokens
             if max_output_tokens is not None
             else self.default_max_output_tokens
-        )
-
-        # 建構請求資料
+        )  # 建構請求資料
         request_data = {
             "model": model,
             "config": types.GenerateContentConfig(
@@ -129,14 +125,33 @@ class GeminiClient:
             # 發送簡單的測試請求
             model_list = self.get_model_list()
             return model_list is not None
-        except Exception as e:
-            logger.error(f"健康檢查失敗: {str(e)}")
+        except (ConnectionError, TimeoutError, ValueError) as e:
+            logger.error("健康檢查失敗: %s", str(e))
             return False
 
 
-def gemini_service() -> GeminiClient:
-    """建立並返回 Gemini API 客戶端實例（相容性函式）
+class GeminiModel(Enum):
+    """Gemini 模型枚舉
 
-    這個函式提供向後相容性，建議直接使用 GeminiClient 類別
+    定義可用的 Gemini 模型名稱
+    包括：
+    - gemini-2.5-pro
+    - gemini-2.5-flash
+    - gemini-2.5-flash-lite-preview-06-17
     """
-    return GeminiClient(settings.gemini_api_key)
+
+    GEMINI_2_5_PRO = "gemini-2.5-pro"
+    GEMINI_2_5_FLASH = "gemini-2.5-flash"
+    GEMINI_2_5_FLASH_LITE = "gemini-2.5-flash-lite-preview-06-17"
+
+
+def gemini_service(api_key: str) -> GeminiClient:
+    """建立並返回 Gemini API 客戶端實例
+
+    Args:
+        api_key: API 密鑰
+
+    Returns:
+        GeminiClient: 配置好的 Gemini 客戶端實例
+    """
+    return GeminiClient(api_key)

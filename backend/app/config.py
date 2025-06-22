@@ -17,9 +17,6 @@ class Settings(BaseSettings):
     # 資料庫設定
     database_url: str = "sqlite:///database.db"
 
-    # Gemini API 設定
-    gemini_api_key: str = ""
-
     model_config = SettingsConfigDict(env_file=".env")
 
     @field_validator("secret_key", mode="before")

@@ -14,6 +14,7 @@ class PromptOptimizeRequest(BaseModel):
     包含原始 Prompt、模板 ID、模型名稱與溫度參數。
     """
 
+    api_key: str
     original_prompt: str
     template_id: int
     model: str
