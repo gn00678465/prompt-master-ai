@@ -6,10 +6,8 @@ from datetime import datetime, timedelta, timezone
 import uuid
 
 from jose import jwt
-from sqlmodel import select
 
 from app.config import settings
-from app.models.token_blacklist import TokenBlacklist
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
@@ -38,9 +36,3 @@ def decode_token(token: str):
     """驗證 JWT token 並回傳 payload"""
     payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
     return payload
-
-
-def is_token_blacklisted(jti: str, session) -> bool:
-    """檢查 Token 是否在黑名單中"""
-    statement = select(TokenBlacklist).where(TokenBlacklist.token_jti == jti)
-    return session.exec(statement).first() is not None

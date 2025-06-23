@@ -9,9 +9,15 @@ from fastapi import APIRouter, Body, Depends, HTTPException, status
 from sqlmodel import select
 
 from app.dependencies import SessionDep, VerifyUserDep, get_token_header
-from app.models import TokenBlacklist, User
+from app.models import User
 from app.schemas.user import UserCreate, UserLogin, UserOut
-from app.utils import create_access_token, decode_token, hash_password, verify_password
+from app.utils import (
+    add_token_to_blacklist,
+    create_access_token,
+    decode_token,
+    hash_password,
+    verify_password,
+)
 
 router = APIRouter(
     prefix="/v1/auth",
@@ -104,14 +110,13 @@ async def read_current_user(data: VerifyUserDep):
 @router.post("/logout")
 async def user_logout(
     token: Annotated[str, Depends(get_token_header)],
-    session: SessionDep,
     current_user: VerifyUserDep,
 ):
     """用戶登出，將 Token 加入黑名單"""
     try:
         payload = decode_token(token)
-        jti = payload.get("jti")
-        exp = payload.get("exp")
+        jti: str | None = payload.get("jti")
+        exp: int | None = payload.get("exp")
 
         if jti and exp:
             # 檢查 user_id 是否為 None
@@ -120,17 +125,11 @@ async def user_logout(
                     status_code=status.HTTP_400_BAD_REQUEST, detail="無效的使用者"
                 )
 
-            # 將 Token 加入黑名單
-            blacklist_entry = TokenBlacklist(
-                token_jti=jti,
-                user_id=current_user.user_id,
-                expires_at=datetime.fromtimestamp(exp, tz=timezone.utc),
-            )
-            session.add(blacklist_entry)
-            session.commit()
+            add_token_to_blacklist(jti, exp)
 
         return {"message": "Successfully logged out"}
     except Exception as e:
+        print(f"Logout error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="登出失敗"
         ) from e

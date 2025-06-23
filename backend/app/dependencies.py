@@ -106,8 +106,8 @@ def verify_current_user(
             )
 
         # 檢查 JTI 是否在黑名單中
-        jti = payload.get("jti")
-        if jti and is_token_blacklisted(jti, session):
+        jti: str | None = payload.get("jti")
+        if jti and is_token_blacklisted(jti):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Token 已失效"
             )
@@ -154,8 +154,8 @@ def verify_optional_current_user(
             )
 
         # 檢查 JTI 是否在黑名單中
-        jti = payload.get("jti")
-        if jti and is_token_blacklisted(jti, session):
+        jti: str | None = payload.get("jti")
+        if jti and is_token_blacklisted(jti):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Token 已失效"
             )
