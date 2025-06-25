@@ -9,3 +9,4 @@ pytest
 pytest-asyncio
 httpx
 pytest-mock
+redis

@@ -91,8 +91,9 @@ def get_token_header(
     return credentials.credentials
 
 
-def get_current_user(
-    token: Annotated[str, Depends(get_token_header)], session: SessionDep
+def verify_current_user(
+    token: Annotated[str, Depends(get_token_header)],
+    session: Annotated[Session, Depends(get_session)],
 ) -> User | None:
     """
     驗證 token 並回傳當前使用者
@@ -105,8 +106,8 @@ def get_current_user(
             )
 
         # 檢查 JTI 是否在黑名單中
-        jti = payload.get("jti")
-        if jti and is_token_blacklisted(jti, session):
+        jti: str | None = payload.get("jti")
+        if jti and is_token_blacklisted(jti):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Token 已失效"
             )
@@ -124,4 +125,53 @@ def get_current_user(
         ) from e
 
 
-CurrentUserDep = Annotated[User, Depends(get_current_user)]
+def get_optional_token_header(
+    credentials: HTTPAuthorizationCredentials = Security(security),
+) -> str | None:
+    """
+    取得可選的 token，如果沒有提供則回傳 None
+    """
+    if credentials is None:
+        return None
+    return credentials.credentials
+
+
+def verify_optional_current_user(
+    token: Annotated[str | None, Depends(get_optional_token_header)],
+    session: Annotated[Session, Depends(get_session)],
+) -> User | None:
+    """
+    可選的使用者驗證，如果沒有 token 則回傳 None
+    """
+    if token is None:
+        return None
+
+    try:
+        payload = decode_token(token)
+        if payload is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="無效的認證憑證"
+            )
+
+        # 檢查 JTI 是否在黑名單中
+        jti: str | None = payload.get("jti")
+        if jti and is_token_blacklisted(jti):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Token 已失效"
+            )
+
+        user_id = payload.get("user_id")
+        user = session.exec(select(User).where(User.user_id == user_id))
+        return user.first()  # 返回第一個匹配的使用者
+    except ExpiredSignatureError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token 已過期，請重新登入"
+        ) from e
+    except JWTError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="無效的認證憑證"
+        ) from e
+
+
+VerifyUserDep = Annotated[User, Depends(verify_current_user)]
+OptionalVerifyUserDep = Annotated[User | None, Depends(verify_optional_current_user)]

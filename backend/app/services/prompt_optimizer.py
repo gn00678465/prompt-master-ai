@@ -5,7 +5,7 @@ Prompt 優化服務模組
 from sqlmodel import Session, select
 
 from app.models import PromptHistory, Template
-from app.schemas.prompt import PromptOptimizeRequest, PromptOptimizeResponse
+from app.schemas.optimize import PromptOptimizeRequest, PromptOptimizeResponse
 from app.services.gemini_client import GeminiClient
 
 
@@ -19,7 +19,7 @@ class PromptOptimizerService:
         self.gemini_client = gemini_client
 
     async def optimize_prompt(
-        self, user_id: int, request: PromptOptimizeRequest
+        self, user_id: int | None, request: PromptOptimizeRequest
     ) -> PromptOptimizeResponse:
         """
         優化 Prompt 的主要邏輯
@@ -27,11 +27,11 @@ class PromptOptimizerService:
         1. 驗證並獲取模板
         2. 檢查用戶權限
         3. 呼叫 Gemini API
-        4. 儲存歷史記錄
+        4. 儲存歷史記錄(如果用戶已登入)
         5. 返回結果
         """
         # 1. 獲取模板
-        template = await self._get_template(request.template_id)
+        template = await self._get_template(user_id, request.template_id)
 
         # 驗證必要參數
         if not request.model:
@@ -57,28 +57,45 @@ class PromptOptimizerService:
         )
 
         # 3. 儲存歷史記錄
-        await self._save_history(
-            user_id=user_id,
-            original_prompt=request.original_prompt,
-            optimized_prompt=optimized_result["optimized_prompt"],
-            template_id=template_id,
-            model_used=model,
-            temperature=temperature,
-        )
-
-        # 4. 返回結果
+        if user_id is not None:
+            await self._save_history(
+                user_id=user_id,
+                original_prompt=request.original_prompt,
+                optimized_prompt=optimized_result["optimized_prompt"],
+                template_id=template_id,
+                model_used=model,
+                temperature=temperature,
+            )  # 4. 返回結果
         return PromptOptimizeResponse(
             optimized_prompt=optimized_result["optimized_prompt"],
             improvement_analysis=optimized_result["improvement_analysis"],
             original_prompt=request.original_prompt,
         )
 
-    async def _get_template(self, template_id: int | None) -> Template:
-        """獲取模板"""
+    async def _get_template(
+        self, user_id: int | None, template_id: int | None
+    ) -> Template:
+        """
+        獲取模板
+
+        規則：
+        - 當 user_id is not None: 尋找符合 user_id 與 template_id 的模板
+        - 當 user_id is None: 尋找符合 is_default=True 與 template_id 的模板
+        """
         if template_id is None:
             raise ValueError("未提供模板")
 
-        statement = select(Template).where(Template.template_id == template_id)
+        # 根據 user_id 是否為 None 來構建不同的查詢條件
+        if user_id is not None:
+            # 已登入用戶：查找該用戶的模板
+            statement = select(Template).where(
+                Template.template_id == template_id, Template.user_id == user_id
+            )
+        else:
+            # 未登入用戶：只能使用預設模板
+            statement = select(Template).where(
+                Template.template_id == template_id, Template.is_default
+            )
 
         template = self.session.exec(statement).first()
         if not template:

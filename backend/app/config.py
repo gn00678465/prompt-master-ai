@@ -14,11 +14,12 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
 
+    # Redis 設定
+    redis_host: str = "localhost"
+    redis_port: int = 6379
+
     # 資料庫設定
     database_url: str = "sqlite:///database.db"
-
-    # Gemini API 設定
-    gemini_api_key: str = ""
 
     model_config = SettingsConfigDict(env_file=".env")
 

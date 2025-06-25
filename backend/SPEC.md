@@ -26,9 +26,11 @@
 ### 2.2 模板系統
 
 #### 2.2.1 預設模板
-實現至少三個預設模板，提供不同程度的 Prompt 的優化指導。
+- 實現至少三個預設模板，提供不同程度的 Prompt 的優化指導。
+- 不須登入也可以取得
+- 不能修改與移除
 
-#### 2.2.2 模板管理
+#### 2.2.2 模板管理 (auth)
 - 提供模板的 CRUD 操作
 - 支持用戶自定義模板
 - 實現模板權限管理（私有/公共）
@@ -52,7 +54,7 @@
 - 每次 API 請求驗證時檢查 Token 是否在黑名單中
 - 定期清理過期的黑名單記錄
 
-### 2.4 歷史記錄管理
+### 2.4 歷史記錄管理 (auth)
 
 #### 2.4.1 功能描述
 記錄用戶的 Prompt 優化歷史，支持查詢和重用。
@@ -185,31 +187,6 @@ backend/
 - 請求發送與回應處理
 - 錯誤處理與重試
 
-**核心方法**：
-```python
-class GeminiClient:
-    async def optimize_prompt_with_template(
-        self, 
-        template_content: str,  # 模板內容作為系統提示詞
-        user_prompt: str,       # 用戶原始 Prompt
-        model: str = "gemini-pro",
-        temperature: float = 0.7
-    ) -> dict:
-        """
-        使用模板優化 Prompt
-        
-        Args:
-            template_content: 模板內容，用作系統提示詞
-            user_prompt: 用戶的原始 Prompt
-            model: 使用的模型
-            temperature: 溫度參數
-            
-        Returns:
-            包含優化結果和分析的字典
-        """
-        pass
-```
-
 #### 4.2.2 Prompt 優化服務
 實現核心的 Prompt 優化邏輯。
 
@@ -218,29 +195,6 @@ class GeminiClient:
 - 權限檢查（確保用戶可以使用該模板）
 - 優化請求處理
 - 結果儲存
-
-**核心方法**：
-```python
-class PromptOptimizationService:
-    async def optimize_prompt(
-        self,
-        user_id: int,
-        original_prompt: str,
-        template_id: int,
-        model: str = "gemini-pro",
-        temperature: float = 0.7
-    ) -> dict:
-        """
-        優化 Prompt 的主要邏輯
-        
-        1. 驗證並獲取模板
-        2. 檢查用戶權限
-        3. 調用 Gemini API
-        4. 儲存歷史記錄
-        5. 返回結果
-        """
-        pass
-```
 
 #### 4.2.3 資料庫存取層
 使用 SQLAlchemy ORM 實現資料庫交互。
@@ -346,14 +300,10 @@ Authorization: Bearer {token}
 #### `POST /api/prompts/optimize`
 優化 Prompt。根據選擇的模板作為系統提示詞與 Gemini API 互動。
 
-**請求頭**：
-```
-Authorization: Bearer {token}
-```
-
 **請求體**：
 ```json
 {
+  "api_key": "string",
   "original_prompt": "string",
   "template_id": "integer",
   "model": "string (default: gemini-pro)",
@@ -400,12 +350,28 @@ Authorization: Bearer {token}
 ]
 ```
 
+#### `DELETE /api/prompts/history/{history_id}`
+刪除用戶的 Prompt 歷史記錄。
+
+**請求頭**：
+```
+Authorization: Bearer {token}
+```
+
+**回應（成功）**：
+```json
+{
+  "message": "Prompt history deleted successfully"
+}
+```
+
 ### 5.3 模板 API
 
 #### `GET /api/templates`
 獲取模板列表（包含預設模板和用戶自定義模板）。
+未帶入 `Authorization` 時，返回預設模板。
 
-**請求頭**：
+**請求頭 (Optional)**：
 ```
 Authorization: Bearer {token}
 ```
@@ -537,16 +503,11 @@ Authorization: Bearer {token}
 #### `GET /api/models`
 獲取可用的模型列表。
 
-**請求頭**：
-```
-Authorization: Bearer {token}
-```
-
 **回應（成功）**：
 ```json
 [
   {
-    "id": "string",
+    "name": "string",
     "displayName": "string"
   }
 ]
