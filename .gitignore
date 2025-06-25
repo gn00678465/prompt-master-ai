@@ -258,5 +258,5 @@ release-artifacts-*
 
 .output
 .vinxi
-.nitro/**
+**/.nitro/**
 .claude
