@@ -17,7 +17,7 @@ export function FrequentlyAskedQuestions() {
             <AccordionTrigger className="text-emerald-600 font-medium">
               <div className="flex items-center">
                 <ChevronDown className="h-5 w-5 text-emerald-600 mr-2 shrink-0" />
-                1. 如何使用 Better Prompt?
+                1. 如何使用 Prompt Master?
               </div>
             </AccordionTrigger>
             <AccordionContent className="pl-7">

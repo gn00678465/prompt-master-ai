@@ -1,4 +1,5 @@
 export interface OptimizePayload {
+  api_key: string
   original_prompt: string
   template_id: number
   model: string

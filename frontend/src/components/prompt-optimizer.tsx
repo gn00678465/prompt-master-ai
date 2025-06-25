@@ -14,10 +14,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
 import { Textarea } from '@/components/ui/textarea'
+import { useAuthStore } from '@/stores/useAuthStore'
 
-type OptimizationFormData = OptimizePayload & {
-  apiKey: string
-}
+type OptimizationFormData = OptimizePayload
 
 interface PromptOptimizerProps {
   templates?: TemplateEntries
@@ -32,24 +31,26 @@ const schema = z.object({
   model: z.string().min(1, '請選擇一個模型'),
   temperature: z.number().min(0, '溫度不能小於 0').max(1, '溫度不能大於 1'),
   original_prompt: z.string().min(1, '提示詞為必填項目'),
-  apiKey: z.string().min(1, 'API 金鑰為必填項目'),
+  api_key: z.string().min(1, 'API 金鑰為必填項目'),
+  max_output_tokens: z.number().optional(),
 })
 
 function defaultOnSubmit() { }
 
 export function PromptOptimizer({ templates, models, optimizedTemplate = '', isLoading = false, onSubmit = defaultOnSubmit }: PromptOptimizerProps) {
   const [localOptimizedResult, setLocalOptimizedResult] = useState('')
+  const auth = useAuthStore(state => state.data)
 
   // 計算最終顯示的優化結果：優先使用 prop 傳入的值，否則使用本地狀態
   const displayedResult = optimizedTemplate || localOptimizedResult
 
   const { control, handleSubmit, formState: { errors }, reset } = useForm<OptimizationFormData>({
     defaultValues: {
+      api_key: '',
       template_id: 0,
       model: '',
       temperature: 0.1,
       original_prompt: '',
-      apiKey: '',
     },
     resolver: zodResolver(schema),
   })
@@ -79,34 +80,38 @@ export function PromptOptimizer({ templates, models, optimizedTemplate = '', isL
           </CardHeader>
           <CardContent className="space-y-6">
             <Controller
-              name="apiKey"
+              name="api_key"
               control={control}
               rules={{ required: 'API 金鑰為必填項目' }}
               render={({ field }) => (
                 <div className="space-y-1">
                   <ApiKeyInput {...field} />
-                  {errors.apiKey && (
-                    <p className="text-sm text-red-500">{errors.apiKey.message}</p>
+                  {errors.api_key && (
+                    <p className="text-sm text-red-500">{errors.api_key.message}</p>
                   )}
                 </div>
               )}
             />
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between h-8">
                 <h3 className="font-medium">優化模板</h3>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-8 flex items-center gap-1 border-emerald-600 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
-                  asChild={true}
-                >
-                  <Link to="/templates">
-                    <Settings className="h-3.5 w-3.5" />
-                    模板管理
-                  </Link>
-                </Button>
+                {
+                  auth && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 flex items-center gap-1 border-emerald-600 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
+                      asChild={true}
+                    >
+                      <Link to="/templates">
+                        <Settings className="h-3.5 w-3.5" />
+                        模板管理
+                      </Link>
+                    </Button>
+                  )
+                }
               </div>
               <Controller
                 name="template_id"

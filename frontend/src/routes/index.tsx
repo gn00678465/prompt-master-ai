@@ -85,11 +85,8 @@ function PromptMasterAI() {
     }
   }
 
-  function onSubmit(data: OptimizePayload & {
-    apiKey: string
-  }) {
-    const { apiKey, ...other } = data
-    optimizeMutation.mutate(other)
+  function onSubmit(data: OptimizePayload) {
+    optimizeMutation.mutate(data)
   }
 
   return (
@@ -126,7 +123,7 @@ function PromptMasterAI() {
         <h1 className="text-2xl font-bold text-emerald-600 flex items-center justify-center gap-2">
           <Lightbulb className="h-6 w-6" />
           {' '}
-          Better Prompt - Prompt 優化神器
+          Prompt Master - Prompt 優化神器
         </h1>
         <p className="text-muted-foreground mt-2">
           一鍵優化您的提示詞，釋放 AI 模型潛能，支援各種模板與模型，請先設置 Gemini API Key 開始使用。
