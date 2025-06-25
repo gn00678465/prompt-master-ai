@@ -1,23 +1,53 @@
+import type { MouseEventHandler } from 'react'
 import type { ModelEntries } from '@/types/model'
 import type { OptimizePayload, OptimizeResponse } from '@/types/optimize'
 import { useMutation } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Clock, Lightbulb, User } from 'lucide-react'
-import { useEffect, useState } from 'react'
 import { FrequentlyAskedQuestions } from '@/components/frequently-asked-questions'
 import { PromptOptimizer } from '@/components/prompt-optimizer'
 import { Button } from '@/components/ui/button'
 import { useFetch } from '@/hooks/useFetch'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { useTemplateStore } from '@/stores/useTemplateStore'
+import { api } from '@/utils'
+
+export const Route = createFileRoute('/')({
+  component: PromptMasterAI,
+  context: () => {
+    return {
+      useAuthStore,
+      useTemplateStore,
+    }
+  },
+  loader: async ({ context }) => {
+    const fetchTemplates = context.useTemplateStore.getState().fetch
+    const auth = context.useAuthStore.getState().data
+
+    const res = await Promise.allSettled([
+      api<ModelEntries>('/api/v1/models/models', {
+        method: 'GET',
+      }),
+      fetchTemplates(auth
+        ? {
+          headers: {
+            Authorization: `Bearer ${auth?.access_token}`,
+          },
+        }
+        : undefined),
+    ])
+
+    return {
+      models: res[0].status === 'fulfilled' ? res[0].value : [],
+      templates: res[1].status === 'fulfilled' ? res[1].value : [],
+    }
+  },
+})
 
 function PromptMasterAI() {
-  const [models, setModels] = useState<ModelEntries>([])
+  const { models, templates } = Route.useLoaderData()
   const auth = useAuthStore(state => state.data)
-  const isHydrated = useAuthStore(state => state.isHydrated)
   const { $fetch } = useFetch()
-  const fetchTemplates = useTemplateStore(state => state.fetch)
-  const templates = useTemplateStore(state => state.templates)
 
   const optimizeMutation = useMutation({
     mutationKey: ['optimize'],
@@ -32,27 +62,28 @@ function PromptMasterAI() {
     },
   })
 
-  useEffect(() => {
-    // 只有在 Zustand 完成 hydration 且有 access_token 時才發送請求
-    if (!isHydrated || !auth?.access_token) {
-      return
-    }
-
-    Promise.allSettled([
-      fetchTemplates(),
-      $fetch<ModelEntries>('/api/v1/models/models', {
-        method: 'GET',
+  const logoutMutation = useMutation({
+    mutationKey: ['logout'],
+    mutationFn: () => {
+      return $fetch('/api/v1/auth/logout', {
+        method: 'POST',
         headers: {
-          Authorization: `Bearer ${auth.access_token}`,
+          Authorization: `Bearer ${auth?.access_token}`,
         },
-      }),
-    ]).then(([_, models]) => {
-      // 處理 models 資料
-      if (models.status === 'fulfilled') {
-        setModels(models.value)
-      }
-    })
-  }, [auth, isHydrated, $fetch])
+      })
+    },
+    onSuccess: () => {
+      useAuthStore.getState().resetAuthData()
+    },
+  })
+
+  const onLogout: MouseEventHandler<HTMLButtonElement> = (e) => {
+    if (auth?.access_token) {
+      e.preventDefault()
+      e.stopPropagation()
+      logoutMutation.mutate()
+    }
+  }
 
   function onSubmit(data: OptimizePayload & {
     apiKey: string
@@ -69,15 +100,20 @@ function PromptMasterAI() {
           className="flex items-center gap-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
           asChild={true}
         >
-          <Link to="/history">
-            <Clock className="h-4 w-4" />
-            歷史記錄
-          </Link>
+          {
+            auth && (
+              <Link to="/history">
+                <Clock className="h-4 w-4" />
+                歷史記錄
+              </Link>
+            )
+          }
         </Button>
         <Button
           variant="outline"
           className="flex items-center gap-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
           asChild={true}
+          onClick={onLogout}
         >
           <Link to="/auth">
             <User className="h-4 w-4" />
@@ -107,7 +143,3 @@ function PromptMasterAI() {
     </div>
   )
 }
-
-export const Route = createFileRoute('/')({
-  component: PromptMasterAI,
-})

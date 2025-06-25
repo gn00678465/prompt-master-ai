@@ -1,7 +1,7 @@
 // app/routes/__root.tsx
 import type { QueryClient } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
-import type { AuthResponse } from '@/types/auth'
+import type { useAuthStore } from '@/stores/useAuthStore'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import {
   createRootRouteWithContext,
@@ -13,9 +13,9 @@ import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { Toaster } from '@/components/ui/sonner'
 import appCss from '@/styles/app.css?url'
 
-interface RouterContext {
+export interface RouterContext {
   queryClient: QueryClient
-  auth?: AuthResponse
+  useAuthStore?: typeof useAuthStore
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({

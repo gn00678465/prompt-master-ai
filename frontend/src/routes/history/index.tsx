@@ -298,4 +298,12 @@ function HistoryPage() {
 
 export const Route = createFileRoute('/history/')({
   component: HistoryPage,
+  context: () => {
+    return {
+      useAuthStore,
+    }
+  },
+  loader: async ({ context }) => {
+    console.log('Loading history page...', context.useAuthStore)
+  },
 })
