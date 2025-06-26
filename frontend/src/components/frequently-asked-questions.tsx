@@ -1,14 +1,14 @@
 import { PlusIcon } from 'lucide-react'
 import { Accordion as AccordionPrimitive } from 'radix-ui'
 import { useState } from 'react'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { Accordion, AccordionContent, AccordionItem } from '@/components/ui/accordion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export function FrequentlyAskedQuestions() {
   const [expandedFaq, setExpandedFaq] = useState('item-1')
 
   return (
-    <Card>
+    <Card className="shadow-lg">
       <CardHeader className="text-center">
         <CardTitle className="text-xl text-emerald-600">常見問題解答 (FAQ)</CardTitle>
       </CardHeader>

@@ -70,7 +70,7 @@ export function PromptOptimizer({ templates, models, optimizedTemplate = '', isL
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="h-max-[1100px]">
+        <Card className="h-max-[1100px] shadow-lg">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2 text-emerald-600">
               <Edit className="h-5 w-5" />
@@ -79,117 +79,120 @@ export function PromptOptimizer({ templates, models, optimizedTemplate = '', isL
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <Controller
-              name="api_key"
-              control={control}
-              rules={{ required: 'API 金鑰為必填項目' }}
-              render={({ field }) => (
-                <div className="space-y-1">
-                  <ApiKeyInput {...field} />
-                  {errors.api_key && (
-                    <p className="text-sm text-red-500">{errors.api_key.message}</p>
-                  )}
-                </div>
-              )}
-            />
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between h-8">
-                <h3 className="font-medium">優化模板</h3>
-                {
-                  auth && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="h-8 flex items-center gap-1 border-emerald-600 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
-                      asChild={true}
-                    >
-                      <Link to="/templates">
-                        <Settings className="h-3.5 w-3.5" />
-                        模板管理
-                      </Link>
-                    </Button>
-                  )
-                }
-              </div>
+            <div className="shadow-md p-6 border rounded-md space-y-4">
               <Controller
-                name="template_id"
+                name="api_key"
                 control={control}
+                rules={{ required: 'API 金鑰為必填項目' }}
                 render={({ field }) => (
-                  <TemplateSelector
-                    templates={templates || []}
-                    selectedTemplateId={field.value}
-                    onSelectTemplateId={field.onChange}
-                  />
+                  <div className="space-y-1">
+                    <ApiKeyInput {...field} />
+                    {errors.api_key && (
+                      <p className="text-sm text-red-500">{errors.api_key.message}</p>
+                    )}
+                  </div>
                 )}
               />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2 w-full">
-                <h3 className="font-medium">使用模型</h3>
-                <Controller
-                  name="model"
-                  control={control}
-                  render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="w-full" aria-invalid={!!errors.model}>
-                        <SelectValue placeholder="選擇模型" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {
-                          models?.length
-                            ? models.map(model => (
-                              <SelectItem key={model.name} value={model.name}>
-                                {model.displayName}
-                              </SelectItem>
-                            ))
-                            : (
-                              <SelectItem value="empty" disabled>無可用模型</SelectItem>
-                            )
-                        }
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Flash Lite 速度快，Flash 品質佳，Pro 品質最佳但最慢</span>
-                </div>
-                {errors.model && (
-                  <p className="text-sm text-red-500">{errors.model.message}</p>
-                )}
-              </div>
 
               <div className="space-y-2">
-                <h3 className="font-medium">溫度</h3>
+                <div className="flex items-center justify-between h-8">
+                  <h3 className="font-medium">優化模板</h3>
+                  {
+                    auth && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 flex items-center gap-1 border-emerald-600 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
+                        asChild={true}
+                      >
+                        <Link to="/templates">
+                          <Settings className="h-3.5 w-3.5" />
+                          模板管理
+                        </Link>
+                      </Button>
+                    )
+                  }
+                </div>
                 <Controller
-                  name="temperature"
+                  name="template_id"
                   control={control}
                   render={({ field }) => (
-                    <>
-                      <Slider
-                        value={[field.value || 0]}
-                        min={0}
-                        max={1}
-                        step={0.1}
-                        onValueChange={values => field.onChange(values[0])}
-                        className="py-4"
-                      />
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>低溫=穩定內容</span>
-                        <span>{field.value}</span>
-                        <span>高溫=創新內容</span>
-                      </div>
-                    </>
+                    <TemplateSelector
+                      templates={templates || []}
+                      selectedTemplateId={field.value}
+                      onSelectTemplateId={field.onChange}
+                    />
                   )}
                 />
               </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2 w-full">
+                  <h3 className="font-medium">使用模型</h3>
+                  <Controller
+                    name="model"
+                    control={control}
+                    render={({ field }) => (
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger className="w-full" aria-invalid={!!errors.model}>
+                          <SelectValue placeholder="選擇模型" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {
+                            models?.length
+                              ? models.map(model => (
+                                <SelectItem key={model.name} value={model.name}>
+                                  {model.displayName}
+                                </SelectItem>
+                              ))
+                              : (
+                                <SelectItem value="empty" disabled>無可用模型</SelectItem>
+                              )
+                          }
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Flash Lite 速度快，Flash 品質佳，Pro 品質最佳但最慢</span>
+                  </div>
+                  {errors.model && (
+                    <p className="text-sm text-red-500">{errors.model.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <h3 className="font-medium">溫度</h3>
+                  <Controller
+                    name="temperature"
+                    control={control}
+                    render={({ field }) => (
+                      <>
+                        <Slider
+                          value={[field.value || 0]}
+                          min={0}
+                          max={1}
+                          step={0.1}
+                          onValueChange={values => field.onChange(values[0])}
+                          className="py-4"
+                        />
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>低溫=穩定內容</span>
+                          <span>{field.value}</span>
+                          <span>高溫=創新內容</span>
+                        </div>
+                      </>
+                    )}
+                  />
+                </div>
+              </div>
+
             </div>
 
             <div className="space-y-2">
-              <h3 className="font-medium flex items-center gap-2">
-                <Edit className="h-4 w-4 text-emerald-600" />
+              <h3 className="flex items-center gap-2 text-emerald-600 font-semibold">
+                <Edit className="h-4 w-4" />
                 {' '}
                 原始提示詞
               </h3>
@@ -238,7 +241,7 @@ export function PromptOptimizer({ templates, models, optimizedTemplate = '', isL
           </CardContent>
         </Card>
 
-        <Card className="h-max-[1100px]">
+        <Card className="h-max-[1100px] shadow-lg">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2 text-emerald-600">
               <Lightbulb className="h-5 w-5" />
