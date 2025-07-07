@@ -3,7 +3,7 @@ import type { OptimizePayload } from '@/types/optimize'
 import type { TemplateEntries } from '@/types/template'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from '@tanstack/react-router'
-import { Copy, Edit, Lightbulb, Settings, Trash2 } from 'lucide-react'
+import { Copy, Edit, Lightbulb, Settings, Trash2, WandSparkles } from 'lucide-react'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import z from 'zod'
@@ -11,6 +11,7 @@ import { ApiKeyInput } from '@/components/api-key-input'
 import { TemplateSelector } from '@/components/template-selector'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
 import { Textarea } from '@/components/ui/textarea'
@@ -96,7 +97,7 @@ export function PromptOptimizer({ templates, models, optimizedTemplate = '', isL
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between h-8">
-                  <h3 className="font-medium">優化模板</h3>
+                  <Label className="font-medium">優化模板</Label>
                   {
                     auth && (
                       <Button
@@ -129,7 +130,7 @@ export function PromptOptimizer({ templates, models, optimizedTemplate = '', isL
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2 w-full">
-                  <h3 className="font-medium">使用模型</h3>
+                  <Label className="font-medium">使用模型</Label>
                   <Controller
                     name="model"
                     control={control}
@@ -163,7 +164,7 @@ export function PromptOptimizer({ templates, models, optimizedTemplate = '', isL
                 </div>
 
                 <div className="space-y-2">
-                  <h3 className="font-medium">溫度</h3>
+                  <Label className="font-medium">溫度</Label>
                   <Controller
                     name="temperature"
                     control={control}
@@ -223,9 +224,9 @@ export function PromptOptimizer({ templates, models, optimizedTemplate = '', isL
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="flex-1 bg-emerald-600 hover:bg-emerald-700 flex items-center justify-center gap-2"
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700 flex items-center justify-center gap-2 font-semibold text-base"
               >
-                <Edit className="h-4 w-4" />
+                <WandSparkles className="h-4 w-4" />
                 {isLoading ? '優化中...' : '優化提示詞'}
               </Button>
               <Button
@@ -260,7 +261,7 @@ export function PromptOptimizer({ templates, models, optimizedTemplate = '', isL
               readOnly={false}
             />
 
-            <div className="flex gap-2 mt-4 justify-end">
+            <div className="flex gap-2 mt-4 justify-start">
               {' '}
               <Button
                 type="button"

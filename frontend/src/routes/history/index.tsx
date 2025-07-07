@@ -1,8 +1,10 @@
 import type { OptimizedHistoryEntries, OptimizedHistoryResponse } from '@/types/history'
+import type { ModelEntries } from '@/types/model'
 import { useQuery } from '@tanstack/react-query'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { ArrowLeftIcon, Calendar, Clock, Copy, Lightbulb, Loader2, RotateCcw, Search, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { PageLayout } from '@/components/page-layout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,9 +14,41 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { api } from '@/utils/api'
 
+export const Route = createFileRoute('/history/')({
+  component: HistoryPage,
+  context: () => {
+    return {
+      useAuthStore,
+    }
+  },
+  beforeLoad({ context }) {
+    const auth = context.useAuthStore.getState().data
+
+    if (!auth?.access_token) {
+      throw redirect({
+        to: '/',
+      })
+    }
+  },
+  loader: async ({ context }) => {
+    const queryModel = await context.queryClient.fetchQuery<ModelEntries>({
+      queryKey: ['fetch', 'models'],
+      queryFn: () => api<ModelEntries>('/api/v1/models/models', {
+        method: 'GET',
+      }),
+      staleTime: 300000,
+    })
+
+    return {
+      models: queryModel || [],
+    }
+  },
+})
+
 function HistoryPage() {
+  const { models } = Route.useLoaderData()
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedModel, setSelectedModel] = useState('all')
+  const [selectedModel] = useState('all')
   const [selectedTemplate, setSelectedTemplate] = useState('all')
   const [sortBy, setSortBy] = useState('newest')
 
@@ -86,7 +120,7 @@ function HistoryPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <PageLayout>
       <div className="flex items-center justify-between mb-6">
         <Button className="group cursor-pointer" variant="ghost" asChild={true}>
           <Link to="/">
@@ -126,15 +160,22 @@ function HistoryPage() {
                 />
               </div>
               <div className="flex gap-2">
-                <Select value={selectedModel} onValueChange={setSelectedModel}>
-                  <SelectTrigger className="w-[150px]">
+                <Select value={undefined} onValueChange={() => { }}>
+                  <SelectTrigger className="min-w-60" aria-invalid={false}>
                     <SelectValue placeholder="選擇模型" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">所有模型</SelectItem>
-                    <SelectItem value="gemini-2.5-pro">Gemini 2.5 Pro</SelectItem>
-                    <SelectItem value="gemini-1.5-pro">Gemini 1.5 Pro</SelectItem>
-                    <SelectItem value="gemini-1.0-pro">Gemini 1.0 Pro</SelectItem>
+                    {
+                      models?.length
+                        ? models.map(model => (
+                          <SelectItem key={model.name} value={model.name}>
+                            {model.displayName}
+                          </SelectItem>
+                        ))
+                        : (
+                          <SelectItem value="empty" disabled>無可用模型</SelectItem>
+                        )
+                    }
                   </SelectContent>
                 </Select>
 
@@ -292,18 +333,6 @@ function HistoryPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </PageLayout>
   )
 }
-
-export const Route = createFileRoute('/history/')({
-  component: HistoryPage,
-  context: () => {
-    return {
-      useAuthStore,
-    }
-  },
-  loader: async ({ context }) => {
-    console.log('Loading history page...', context.useAuthStore)
-  },
-})

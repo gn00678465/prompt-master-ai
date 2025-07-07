@@ -1,8 +1,10 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronsUpDown } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/animate-ui/radix/collapsible'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { decryptText, encryptText } from '@/utils/crypto'
 import { db } from '@/utils/db'
 
@@ -12,7 +14,6 @@ interface ApiKeyInputProps {
 }
 
 export function ApiKeyInput({ ref, value, onChange }: ApiKeyInputProps & { ref?: React.Ref<HTMLInputElement | null> }) {
-  const [isExpanded, setIsExpanded] = useState(true)
   const [userInput, setUserInput] = useState<string | null>(null)
 
   // 使用 useLiveQuery 來監聽資料庫變化並解密
@@ -84,42 +85,48 @@ export function ApiKeyInput({ ref, value, onChange }: ApiKeyInputProps & { ref?:
   }
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
-        <h3 className="font-medium">API 密鑰</h3>
-        {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-      </div>
-
-      {isExpanded && (
-        <div className="space-y-2">
-          <Input
-            ref={ref}
-            placeholder="您的 Gemini API 密鑰"
-            type="password"
-            value={currentValue}
-            onChange={e => handleInputChange(e.target.value)}
-          />
-          <Button
-            type="button"
-            className="w-full bg-emerald-600 hover:bg-emerald-700"
-            onClick={handleSaveApiKey}
-          >
-            儲存
-          </Button>
-          <p className="text-xs text-muted-foreground">
-            沒有您的 Gemini API 密鑰，
-            <a
-              href="https://aistudio.google.com/app/apikey"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-emerald-600 hover:underline"
-            >
-              獲取 API 密鑰 →
-            </a>
-          </p>
+    <Collapsible>
+      <div className="space-y-2">
+        <div className="flex items-center justify-between cursor-pointer">
+          <Label className="font-medium">API 密鑰</Label>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="icon" className="p-0 cursor-pointer">
+              <ChevronsUpDown className="h-4 w-4" />
+            </Button>
+          </CollapsibleTrigger>
         </div>
-      )}
-    </div>
+
+        <CollapsibleContent className="-m-1">
+          <div className="space-y-2 p-1">
+            <Input
+              ref={ref}
+              placeholder="您的 Gemini API 密鑰"
+              type="password"
+              value={currentValue}
+              onChange={e => handleInputChange(e.target.value)}
+            />
+            <Button
+              type="button"
+              className="w-full bg-emerald-600 hover:bg-emerald-700"
+              onClick={handleSaveApiKey}
+            >
+              儲存
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              沒有您的 Gemini API 密鑰，
+              <a
+                href="https://aistudio.google.com/app/apikey"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-emerald-600 hover:underline"
+              >
+                獲取 API 密鑰 →
+              </a>
+            </p>
+          </div>
+        </CollapsibleContent>
+      </div>
+    </Collapsible>
   )
 }
 

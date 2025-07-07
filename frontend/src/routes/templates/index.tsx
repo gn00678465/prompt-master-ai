@@ -1,9 +1,10 @@
 import type { TemplateEntry, TemplatePayload } from '@/types/template'
 import { useMutation } from '@tanstack/react-query'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { ArrowLeftIcon, Plus, Search, Settings } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { PageLayout } from '@/components/page-layout'
 import { TemplateCard } from '@/components/template-card'
 import { TemplateForm } from '@/components/template-form'
 import { Badge } from '@/components/ui/badge'
@@ -12,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useAuthStore } from '@/stores/useAuthStore'
 import { useTemplateStore } from '@/stores/useTemplateStore'
 import { api } from '@/utils'
 
@@ -21,6 +23,20 @@ interface SearchFormData {
 
 export const Route = createFileRoute('/templates/')({
   component: TemplatesPage,
+  context: () => {
+    return {
+      useAuthStore,
+    }
+  },
+  beforeLoad({ context }) {
+    const auth = context.useAuthStore.getState().data
+
+    if (!auth?.access_token) {
+      throw redirect({
+        to: '/',
+      })
+    }
+  },
 })
 
 function TemplatesPage() {
@@ -146,7 +162,7 @@ function TemplatesPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <PageLayout>
       <div className="flex items-center justify-between mb-6">
         <Button className="group cursor-pointer" variant="ghost" asChild={true}>
           <Link to="/">
@@ -338,6 +354,6 @@ function TemplatesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageLayout>
   )
 }

@@ -5,6 +5,7 @@ import { useMutation } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Clock, Lightbulb, User } from 'lucide-react'
 import { FrequentlyAskedQuestions } from '@/components/frequently-asked-questions'
+import { PageLayout } from '@/components/page-layout'
 import { PromptOptimizer } from '@/components/prompt-optimizer'
 import { Button } from '@/components/ui/button'
 import { useFetch } from '@/hooks/useFetch'
@@ -24,10 +25,16 @@ export const Route = createFileRoute('/')({
     const fetchTemplates = context.useTemplateStore.getState().fetch
     const auth = context.useAuthStore.getState().data
 
-    const res = await Promise.allSettled([
-      api<ModelEntries>('/api/v1/models/models', {
+    const queryModel = context.queryClient.fetchQuery({
+      queryKey: ['fetch', 'models'],
+      queryFn: () => api<ModelEntries>('/api/v1/models/models', {
         method: 'GET',
       }),
+      staleTime: 300000,
+    })
+
+    const res = await Promise.allSettled([
+      queryModel,
       fetchTemplates(auth
         ? {
           headers: {
@@ -90,7 +97,7 @@ function PromptMasterAI() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <PageLayout>
       <div className="flex justify-end gap-2 mb-4">
         <Button
           variant="outline"
@@ -137,6 +144,6 @@ function PromptMasterAI() {
         {/* 常見問題區塊 */}
         <FrequentlyAskedQuestions />
       </div>
-    </div>
+    </PageLayout>
   )
 }
