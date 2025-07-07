@@ -87,9 +87,10 @@ class PromptOptimizerService:
 
         # 根據 user_id 是否為 None 來構建不同的查詢條件
         if user_id is not None:
-            # 已登入用戶：查找該用戶的模板
+            # 已登入用戶：可以使用自己的模板或預設模板
             statement = select(Template).where(
-                Template.template_id == template_id, Template.user_id == user_id
+                Template.template_id == template_id,
+                (Template.user_id == user_id) | Template.is_default,
             )
         else:
             # 未登入用戶：只能使用預設模板
