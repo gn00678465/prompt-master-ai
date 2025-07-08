@@ -85,7 +85,7 @@ export function ApiKeyInput({ ref, value, onChange }: ApiKeyInputProps & { ref?:
   }
 
   return (
-    <Collapsible>
+    <Collapsible defaultOpen={!storedApiKey}>
       <div className="space-y-2">
         <div className="flex items-center justify-between cursor-pointer">
           <Label className="font-medium">API 密鑰</Label>

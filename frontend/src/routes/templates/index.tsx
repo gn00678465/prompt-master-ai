@@ -1,6 +1,6 @@
 import type { TemplateEntry, TemplatePayload } from '@/types/template'
 import { useMutation } from '@tanstack/react-query'
-import { createFileRoute, Link, redirect } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowLeftIcon, Plus, Search, Settings } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -13,7 +13,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useAuthStore } from '@/stores/useAuthStore'
 import { useTemplateStore } from '@/stores/useTemplateStore'
 import { api } from '@/utils'
 
@@ -23,20 +22,6 @@ interface SearchFormData {
 
 export const Route = createFileRoute('/templates/')({
   component: TemplatesPage,
-  context: () => {
-    return {
-      useAuthStore,
-    }
-  },
-  beforeLoad({ context }) {
-    const auth = context.useAuthStore.getState().data
-
-    if (!auth?.access_token) {
-      throw redirect({
-        to: '/',
-      })
-    }
-  },
 })
 
 function TemplatesPage() {

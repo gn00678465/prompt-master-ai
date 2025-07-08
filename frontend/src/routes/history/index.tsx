@@ -21,15 +21,6 @@ export const Route = createFileRoute('/history/')({
       useAuthStore,
     }
   },
-  beforeLoad({ context }) {
-    const auth = context.useAuthStore.getState().data
-
-    if (!auth?.access_token) {
-      throw redirect({
-        to: '/',
-      })
-    }
-  },
   loader: async ({ context }) => {
     const queryModel = await context.queryClient.fetchQuery<ModelEntries>({
       queryKey: ['fetch', 'models'],
