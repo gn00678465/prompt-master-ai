@@ -1,15 +1,15 @@
+import type { FetchOptions } from 'ofetch'
 import type { TemplateEntry } from '@/types/template'
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { api } from '@/utils'
-import { useAuthStore } from './useAuthStore'
 
 interface State {
   templates: TemplateEntry[]
 }
 
 interface Action {
-  fetch: () => Promise<void>
+  fetch: (options?: FetchOptions<'json', any>) => Promise<TemplateEntry[]>
   update: (templates: TemplateEntry[]) => void
   push: (template: TemplateEntry) => void
   insert: (template: TemplateEntry, index: number) => void
@@ -19,8 +19,6 @@ interface Action {
 
 export const useTemplateStore = create(devtools<State & Action>(
   (set) => {
-    const auth = useAuthStore.getState().data
-
     return {
       templates: [],
       update: (templates: TemplateEntry[]) => set({ templates }),
@@ -42,17 +40,13 @@ export const useTemplateStore = create(devtools<State & Action>(
           return { templates }
         })
       ),
-      fetch: async () => {
-        if (!auth?.access_token) {
-          throw new Error('No access token found')
-        }
+      fetch: async (options?: FetchOptions<'json', any>) => {
         const response = await api<TemplateEntry[]>('/api/v1/templates/', {
           method: 'GET',
-          headers: {
-            Authorization: `Bearer ${auth?.access_token}`,
-          },
+          ...options,
         })
         set({ templates: response })
+        return response
       },
     }
   },

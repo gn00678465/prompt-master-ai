@@ -105,6 +105,7 @@ export function TemplateForm({
           {...register('content')}
           placeholder="輸入模板內容，可以包含變數和指令..."
           rows={8}
+          className="max-h-[300px]"
           aria-invalid={!!errors.content}
         />
         {errors.content && (

@@ -45,7 +45,7 @@ export function TemplateCard({ template, onEdit, onDelete }: TemplateCardProps) 
           </CardContent>
         </Card>
       </HoverCardTrigger>
-      <HoverCardContent className="w-[var(--radix-hover-card-trigger-width)] whitespace-pre-line bg-primary text-primary-foreground">{template.content}</HoverCardContent>
+      <HoverCardContent className="w-[var(--radix-hover-card-trigger-width)] whitespace-pre-line bg-primary text-primary-foreground max-h-[400px] overflow-auto">{template.content}</HoverCardContent>
     </HoverCard>
 
   )

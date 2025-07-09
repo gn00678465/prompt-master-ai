@@ -4,6 +4,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowLeftIcon, Plus, Search, Settings } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { PageLayout } from '@/components/page-layout'
 import { TemplateCard } from '@/components/template-card'
 import { TemplateForm } from '@/components/template-form'
 import { Badge } from '@/components/ui/badge'
@@ -146,7 +147,7 @@ function TemplatesPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <PageLayout>
       <div className="flex items-center justify-between mb-6">
         <Button className="group cursor-pointer" variant="ghost" asChild={true}>
           <Link to="/">
@@ -338,6 +339,6 @@ function TemplatesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageLayout>
   )
 }
