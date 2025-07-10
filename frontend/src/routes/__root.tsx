@@ -14,6 +14,7 @@ import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { Toaster } from '@/components/ui/sonner'
 import { useAuthStore } from '@/stores/useAuthStore'
 import appCss from '@/styles/app.css?url'
+import { seo } from '@/utils/seo'
 
 export interface RouterContext {
   queryClient: QueryClient
@@ -66,9 +67,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         name: 'viewport',
         content: 'width=device-width, initial-scale=1',
       },
-      {
-        title: 'TanStack Start Starter',
-      },
+      ...seo({
+        title:
+          'Prompt Master',
+        description: '一鍵優化您的提示詞，釋放 AI 模型潛能，支援各種模板與模型，請先設置 Gemini API Key 開始使用。',
+      }),
     ],
     links: [
       {
