@@ -18,6 +18,12 @@ RUN pnpm install --frozen-lockfile
 # 複製源代碼
 COPY . .
 
+# 定義建構參數
+ARG VITE_API_URL=""
+
+# 設定環境變數供 Vite 建構時使用
+ENV VITE_API_URL=$VITE_API_URL
+
 # 構建應用
 RUN pnpm run build
 
@@ -36,7 +42,6 @@ WORKDIR /app
 
 # 設定環境變數
 ENV NODE_ENV=production
-ENV VITE_API_URL=""
 
 # 從構建階段複製構建產物
 COPY --from=builder --chown=nextjs:nodejs /app/.output ./.output
