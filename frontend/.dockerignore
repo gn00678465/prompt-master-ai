@@ -12,7 +12,6 @@ dist
 .git
 .gitignore
 README.md
-Dockerfile
 .dockerignore
 coverage
 .nyc_output
