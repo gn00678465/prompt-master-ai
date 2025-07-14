@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # 後端服務
   backend:
@@ -43,8 +41,6 @@ services:
   redis:
     image: redis:7-alpine
     container_name: prompt-master-redis
-    ports:
-      - "6379:6379"
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
