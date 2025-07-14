@@ -1,0 +1,106 @@
+# Python 相關檔案
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# 虛擬環境
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE 和編輯器檔案
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 測試相關
+.coverage
+.pytest_cache/
+.tox/
+.nox/
+htmlcov/
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+
+# 文件和說明檔案
+*.md
+README*
+CHANGELOG*
+LICENSE*
+docs/
+doc/
+
+# Git 相關
+.git/
+.gitignore
+.gitattributes
+
+# 暫存檔案和日誌
+*.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# 開發工具配置
+.ruff_cache/
+.mypy_cache/
+.bandit
+.flake8
+.pre-commit-config.yaml
+
+# 資料庫檔案 (開發用)
+*.db
+*.sqlite
+*.sqlite3
+
+# 環境設定檔案 (可能包含敏感資訊)
+.env*
+!.env.example
+
+# 備份檔案
+*.bak
+*.backup
+
+# 編譯檔案
+*.pyc
+*.pyo
+*.pyd
+
+# 套件管理相關 (保留 uv.lock 和 pyproject.toml)
+pip-log.txt
+pip-delete-this-directory.txt
+
+# 測試資料
+test_data/
+tests/fixtures/
+
+# 暫存目錄
+tmp/
+temp/
