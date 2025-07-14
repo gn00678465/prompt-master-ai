@@ -62,6 +62,7 @@ doc/
 .gitattributes
 
 # Docker 相關
+!Dockerfile
 Dockerfile*
 docker-compose*
 .dockerignore
