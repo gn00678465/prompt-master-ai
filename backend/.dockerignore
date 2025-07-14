@@ -61,12 +61,6 @@ doc/
 .gitignore
 .gitattributes
 
-# Docker 相關
-!Dockerfile
-Dockerfile*
-docker-compose*
-.dockerignore
-
 # 暫存檔案和日誌
 *.log
 *.tmp
