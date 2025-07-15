@@ -23,6 +23,9 @@ export const useAuthStore = create(persist(
       resetAuthData: () => set(() => ({ data: null })),
       setHydrated: () => set(() => ({ isHydrated: true })),
     }),
+    {
+        name: 'auth-store',
+      }
   ),
   {
     name: 'auth-storage',
