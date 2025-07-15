@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import (
     auth_router,
+    health_router,
     history_router,
     models_router,
     prompt_router,
@@ -65,3 +66,4 @@ app.include_router(prompt_router, prefix="/api")
 app.include_router(template_router, prefix="/api")
 app.include_router(models_router, prefix="/api")
 app.include_router(history_router, prefix="/api")
+app.include_router(health_router, prefix="/api")

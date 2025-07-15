@@ -3,6 +3,7 @@ PromptMaster AI 後端 API 模組
 """
 
 from .auth import router as auth_router
+from .health import router as health_router
 from .history import router as history_router
 from .models import router as models_router
 from .optimize import router as prompt_router
@@ -14,4 +15,5 @@ __all__ = [
     "template_router",
     "models_router",
     "history_router",
+    "health_router",
 ]
