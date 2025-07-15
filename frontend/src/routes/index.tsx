@@ -1,7 +1,8 @@
-import type { MouseEventHandler } from 'react'
+import { useEffect, type MouseEventHandler } from 'react'
 import type { ModelEntries } from '@/types/model'
 import type { OptimizePayload, OptimizeResponse } from '@/types/optimize'
-import { useMutation } from '@tanstack/react-query'
+import type { TemplateEntries } from '@/types/template'
+import { useMutation, queryOptions } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Clock, Lightbulb, User } from 'lucide-react'
 import { FrequentlyAskedQuestions } from '@/components/frequently-asked-questions'
@@ -11,42 +12,37 @@ import { Button } from '@/components/ui/button'
 import { useFetch } from '@/hooks/useFetch'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { useTemplateStore } from '@/stores/useTemplateStore'
-import { api } from '@/utils'
+import { api, modelOptions } from '@/utils'
 
 export const Route = createFileRoute('/')({
   component: PromptMasterAI,
   context: () => {
     return {
       useAuthStore,
-      useTemplateStore,
     }
   },
   loader: async ({ context }) => {
-    const fetchTemplates = context.useTemplateStore.getState().fetch
     const auth = context.useAuthStore.getState().data
 
-    const queryModel = context.queryClient.fetchQuery({
-      queryKey: ['fetch', 'models'],
-      queryFn: () => api<ModelEntries>('/api/v1/models/models', {
+    const templateOptions = queryOptions<TemplateEntries>({
+      queryKey: ['templates'],
+      queryFn: () => api('/api/v1/templates/', {
         method: 'GET',
+        headers: auth?.access_token ? {
+          Authorization: `Bearer ${auth?.access_token}`,
+        } : undefined
       }),
-      staleTime: 300000,
+      staleTime: 300000, // 5 minutes
     })
 
-    const res = await Promise.allSettled([
-      queryModel,
-      fetchTemplates(auth
-        ? {
-          headers: {
-            Authorization: `Bearer ${auth?.access_token}`,
-          },
-        }
-        : undefined),
+    await Promise.all([
+      context.queryClient.prefetchQuery(modelOptions),
+      context.queryClient.prefetchQuery(templateOptions),
     ])
 
     return {
-      models: res[0].status === 'fulfilled' ? res[0].value : [],
-      templates: res[1].status === 'fulfilled' ? res[1].value : [],
+      models: context.queryClient.getQueryData(modelOptions.queryKey) || [],
+      templates: context.queryClient.getQueryData(templateOptions.queryKey) || [],
     }
   },
 })
@@ -55,6 +51,11 @@ function PromptMasterAI() {
   const { models, templates } = Route.useLoaderData()
   const auth = useAuthStore(state => state.data)
   const { $fetch } = useFetch()
+  const setTemplates = useTemplateStore(state => state.update)
+
+  useEffect(() => {
+    setTemplates(templates)
+  }, [models, templates])
 
   const optimizeMutation = useMutation({
     mutationKey: ['optimize'],

@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuthStore } from '@/stores/useAuthStore'
-import { api } from '@/utils/api'
+import { api, modelOptions } from '@/utils'
 
 export const Route = createFileRoute('/history/')({
   component: HistoryPage,
@@ -22,13 +22,7 @@ export const Route = createFileRoute('/history/')({
     }
   },
   loader: async ({ context }) => {
-    const queryModel = await context.queryClient.fetchQuery<ModelEntries>({
-      queryKey: ['fetch', 'models'],
-      queryFn: () => api<ModelEntries>('/api/v1/models/models', {
-        method: 'GET',
-      }),
-      staleTime: 300000,
-    })
+    const queryModel = await context.queryClient.ensureQueryData<ModelEntries>(modelOptions)
 
     return {
       models: queryModel || [],

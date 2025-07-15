@@ -19,8 +19,9 @@ RUN uv sync --frozen --no-cache
 # 複製應用程式原始碼
 COPY . .
 
-# 建立 SQLite 資料庫目錄
-RUN mkdir -p /app/data
+# 建立 SQLite 資料庫目錄並將其設定為 volume
+RUN mkdir -p /app/db
+VOLUME /app/db
 
 # 暴露應用程式連接埠
 EXPOSE 8000
