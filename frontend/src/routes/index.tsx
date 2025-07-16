@@ -1,10 +1,10 @@
-import { useEffect, type MouseEventHandler } from 'react'
-import type { ModelEntries } from '@/types/model'
+import type { MouseEventHandler } from 'react'
 import type { OptimizePayload, OptimizeResponse } from '@/types/optimize'
 import type { TemplateEntries } from '@/types/template'
-import { useMutation, queryOptions } from '@tanstack/react-query'
+import { queryOptions, useMutation, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Clock, Lightbulb, User } from 'lucide-react'
+import { useEffect } from 'react'
 import { FrequentlyAskedQuestions } from '@/components/frequently-asked-questions'
 import { PageLayout } from '@/components/page-layout'
 import { PromptOptimizer } from '@/components/prompt-optimizer'
@@ -28,34 +28,39 @@ export const Route = createFileRoute('/')({
       queryKey: ['templates'],
       queryFn: () => api('/api/v1/templates/', {
         method: 'GET',
-        headers: auth?.access_token ? {
-          Authorization: `Bearer ${auth?.access_token}`,
-        } : undefined
+        headers: auth?.access_token
+          ? {
+            Authorization: `Bearer ${auth?.access_token}`,
+          }
+          : undefined,
       }),
       staleTime: 300000, // 5 minutes
     })
 
     await Promise.all([
-      context.queryClient.prefetchQuery(modelOptions),
-      context.queryClient.prefetchQuery(templateOptions),
+      context.queryClient.ensureQueryData(modelOptions),
+      context.queryClient.ensureQueryData(templateOptions),
     ])
 
     return {
-      models: context.queryClient.getQueryData(modelOptions.queryKey) || [],
-      templates: context.queryClient.getQueryData(templateOptions.queryKey) || [],
+      templateOptions,
+      modelOptions,
     }
   },
 })
 
 function PromptMasterAI() {
-  const { models, templates } = Route.useLoaderData()
+  const { modelOptions, templateOptions } = Route.useLoaderData()
   const auth = useAuthStore(state => state.data)
   const { $fetch } = useFetch()
   const setTemplates = useTemplateStore(state => state.update)
 
+  const models = useSuspenseQuery(modelOptions)
+  const templates = useSuspenseQuery(templateOptions)
+
   useEffect(() => {
-    setTemplates(templates)
-  }, [models, templates])
+    setTemplates(templates.data)
+  }, [models, templates.data, setTemplates])
 
   const optimizeMutation = useMutation({
     mutationKey: ['optimize'],
@@ -140,7 +145,7 @@ function PromptMasterAI() {
 
       <div className="space-y-8">
         {/* 優化工具區塊 */}
-        <PromptOptimizer templates={templates} models={models} isLoading={optimizeMutation.isPending} optimizedTemplate={optimizeMutation.data?.optimized_prompt} onSubmit={onSubmit} />
+        <PromptOptimizer templates={templates.data} models={models.data} isLoading={optimizeMutation.isPending} optimizedTemplate={optimizeMutation.data?.optimized_prompt} onSubmit={onSubmit} />
 
         {/* 常見問題區塊 */}
         <FrequentlyAskedQuestions />
