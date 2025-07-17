@@ -1,7 +1,6 @@
 import type { MouseEventHandler } from 'react'
 import type { OptimizePayload, OptimizeResponse } from '@/types/optimize'
-import type { TemplateEntries } from '@/types/template'
-import { queryOptions, useMutation, useSuspenseQuery } from '@tanstack/react-query'
+import { useMutation, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Clock, Lightbulb, User } from 'lucide-react'
 import { useEffect } from 'react'
@@ -12,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { useFetch } from '@/hooks/useFetch'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { useTemplateStore } from '@/stores/useTemplateStore'
-import { api, modelOptions } from '@/utils'
+import { modelOptions, templateOptions } from '@/utils'
 
 export const Route = createFileRoute('/')({
   component: PromptMasterAI,
@@ -22,21 +21,6 @@ export const Route = createFileRoute('/')({
     }
   },
   loader: async ({ context }) => {
-    const auth = context.useAuthStore.getState().data
-
-    const templateOptions = queryOptions<TemplateEntries>({
-      queryKey: ['templates'],
-      queryFn: () => api('/api/v1/templates/', {
-        method: 'GET',
-        headers: auth?.access_token
-          ? {
-            Authorization: `Bearer ${auth?.access_token}`,
-          }
-          : undefined,
-      }),
-      staleTime: 300000, // 5 minutes
-    })
-
     await Promise.all([
       context.queryClient.ensureQueryData(modelOptions),
       context.queryClient.ensureQueryData(templateOptions),
@@ -48,19 +32,6 @@ function PromptMasterAI() {
   const auth = useAuthStore(state => state.data)
   const { $fetch } = useFetch()
   const setTemplates = useTemplateStore(state => state.update)
-
-  const templateOptions = queryOptions<TemplateEntries>({
-    queryKey: ['templates'],
-    queryFn: () => api('/api/v1/templates/', {
-      method: 'GET',
-      headers: auth?.access_token
-        ? {
-          Authorization: `Bearer ${auth?.access_token}`,
-        }
-        : undefined,
-    }),
-    staleTime: 300000, // 5 minutes
-  })
 
   const models = useSuspenseQuery(modelOptions)
   const templates = useSuspenseQuery(templateOptions)
