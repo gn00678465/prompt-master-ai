@@ -1,4 +1,7 @@
 export * from './api'
 export * from './crypto'
+export * from './decode'
+export * from './encode'
 export * from './error'
 export * from './query'
+export * from './seo'

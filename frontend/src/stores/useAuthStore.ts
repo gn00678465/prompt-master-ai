@@ -1,7 +1,6 @@
 import type { AuthResponse } from '@/types/auth'
 import { create } from 'zustand'
-import { devtools } from 'zustand/middleware'
-import { createJSONStorage, persist } from 'zustand/middleware'
+import { createJSONStorage, devtools, persist } from 'zustand/middleware'
 
 interface State {
   data: AuthResponse | null
@@ -24,8 +23,8 @@ export const useAuthStore = create(persist(
       setHydrated: () => set(() => ({ isHydrated: true })),
     }),
     {
-        name: 'auth-store',
-      }
+      name: 'auth-store',
+    },
   ),
   {
     name: 'auth-storage',

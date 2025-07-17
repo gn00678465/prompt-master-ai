@@ -41,19 +41,26 @@ export const Route = createFileRoute('/')({
       context.queryClient.ensureQueryData(modelOptions),
       context.queryClient.ensureQueryData(templateOptions),
     ])
-
-    return {
-      templateOptions,
-      modelOptions,
-    }
   },
 })
 
 function PromptMasterAI() {
-  const { modelOptions, templateOptions } = Route.useLoaderData()
   const auth = useAuthStore(state => state.data)
   const { $fetch } = useFetch()
   const setTemplates = useTemplateStore(state => state.update)
+
+  const templateOptions = queryOptions<TemplateEntries>({
+    queryKey: ['templates'],
+    queryFn: () => api('/api/v1/templates/', {
+      method: 'GET',
+      headers: auth?.access_token
+        ? {
+          Authorization: `Bearer ${auth?.access_token}`,
+        }
+        : undefined,
+    }),
+    staleTime: 300000, // 5 minutes
+  })
 
   const models = useSuspenseQuery(modelOptions)
   const templates = useSuspenseQuery(templateOptions)

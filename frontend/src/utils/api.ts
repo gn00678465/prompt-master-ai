@@ -1,8 +1,9 @@
 import { ofetch } from 'ofetch'
 import { useAuthStore } from '@/stores/useAuthStore'
+import { getEnv } from '../utils/env'
 
 export const api = ofetch.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: getEnv('API_URL'),
   onRequest({ options }) {
     const auth = useAuthStore.getState().data
     if (auth?.access_token) {

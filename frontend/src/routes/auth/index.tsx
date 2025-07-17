@@ -16,8 +16,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useAuth } from '@/hooks/useAuth'
 import { useFetch } from '@/hooks/useFetch'
-import { useAuthStore } from '@/stores/useAuthStore'
 
 export const Route = createFileRoute('/auth/')({
   component: AuthPage,
@@ -61,7 +61,7 @@ function AuthPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const { $fetch } = useFetch()
-  const updateAuthData = useAuthStore(state => state.updateAuthData)
+  const [_auth, updateAuthData] = useAuth()
   const navigate = useNavigate()
 
   const { mutate: mutateLogin, isPending: isLoginPending } = useMutation({

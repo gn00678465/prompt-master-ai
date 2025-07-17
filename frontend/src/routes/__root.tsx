@@ -1,7 +1,6 @@
 // app/routes/__root.tsx
 import type { QueryClient } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
-import type { AuthResponse } from '@/types/auth'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import {
   createRootRouteWithContext,
@@ -14,11 +13,14 @@ import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { Toaster } from '@/components/ui/sonner'
 import { useAuthStore } from '@/stores/useAuthStore'
 import appCss from '@/styles/app.css?url'
-import { seo } from '@/utils/seo'
+import { meOptions, seo } from '@/utils'
 
 export interface RouterContext {
   queryClient: QueryClient
   useAuthStore?: typeof useAuthStore
+  env: {
+    API_URL: string
+  }
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
@@ -39,23 +41,15 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     }
 
     if (auth) {
-      context.queryClient.fetchQuery<AuthResponse>({
-        queryKey: ['auth', 'me'],
-        queryFn: async () => {
-          const response = await fetch('/api/v1/auth/me')
-          if (!response.ok) {
-            throw new Error('Failed to fetch user data')
+      context.queryClient.ensureQueryData(meOptions)
+        .then((data) => {
+          updateAuthData?.(data)
+        })
+        .catch(() => {
+          if (authRequired.some(path => location.pathname.startsWith(path))) {
+            throw redirect({ to: '/' })
           }
-          return response.json()
-        },
-        staleTime: 0,
-      }).then((data) => {
-        updateAuthData?.(data)
-      }).catch(() => {
-        if (authRequired.some(path => location.pathname.startsWith(path))) {
-          throw redirect({ to: '/' })
-        }
-      })
+        })
     }
   },
   head: () => ({
