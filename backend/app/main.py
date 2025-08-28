@@ -14,21 +14,31 @@ from app.api import (
     template_router,
 )
 from app.dependencies import create_db_and_tables
+from app.services.mcp_server import mcp_app
 from app.services.redis_client import Redis
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI):
+async def app_lifespan(_: FastAPI):
     """Create the database and tables"""
     create_db_and_tables()
     await Redis.check_connection()
     # 關閉 Redis 連接
     await Redis.close()
-    # MCP 應用程式會在這裡自動清理
     yield
 
 
-app = FastAPI(lifespan=lifespan)
+# Combine both lifespans
+@asynccontextmanager
+async def combined_lifespan(_: FastAPI):
+    """Run both lifespans"""
+    async with app_lifespan(_):
+        async with mcp_app.lifespan(_):
+            yield
+
+
+app = FastAPI(title="Prompt Master", lifespan=combined_lifespan)
+app.mount("/mcp", mcp_app)
 
 origins = [
     "http://localhost:3000",
