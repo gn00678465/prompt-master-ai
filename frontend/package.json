@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "vite dev --port 3000",
     "build": "vite build",
+    "build:spa": "vite build --config vite.config.spa.ts",
     "start": "node .output/server/index.mjs",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
