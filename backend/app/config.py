@@ -9,6 +9,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """應用程式設定"""
 
+    # server 設定
+    host: str = "0.0.0.0"
+    port: int = 8000
+
     # JWT 設定
     secret_key: str
     algorithm: str = "HS256"
