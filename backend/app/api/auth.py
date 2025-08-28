@@ -125,7 +125,7 @@ async def user_logout(
                     status_code=status.HTTP_400_BAD_REQUEST, detail="無效的使用者"
                 )
 
-            add_token_to_blacklist(jti, exp)
+            await add_token_to_blacklist(jti, exp)
 
         return {"message": "Successfully logged out"}
     except Exception as e:
