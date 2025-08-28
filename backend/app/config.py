@@ -2,7 +2,7 @@
 應用程式設定模組
 """
 
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -19,7 +19,8 @@ class Settings(BaseSettings):
     redis_port: int = 6379
 
     # 資料庫設定
-    database_url: str = "sqlite:///database.db"
+    database_type: str = "sqlite"
+    database_url: str = ""
 
     model_config = SettingsConfigDict(env_file=".env")
 
@@ -30,6 +31,17 @@ class Settings(BaseSettings):
         if not v:
             raise ValueError("SECRET_KEY environment variable is not set.")
         return v
+
+    @model_validator(mode="after")
+    def set_database_url(self) -> "Settings":
+        """根據 database_type 設定 database_url"""
+        if self.database_type == "sqlite":
+            self.database_url = "sqlite:///db/database.db"
+        elif self.database_type == "postgres" and not self.database_url:
+            raise ValueError(
+                "DATABASE_URL environment variable must be set when DATABASE_TYPE is postgres."
+            )
+        return self
 
 
 # 建立全域設定實例

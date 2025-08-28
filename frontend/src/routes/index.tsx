@@ -1,9 +1,9 @@
 import type { MouseEventHandler } from 'react'
-import type { ModelEntries } from '@/types/model'
 import type { OptimizePayload, OptimizeResponse } from '@/types/optimize'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Clock, Lightbulb, User } from 'lucide-react'
+import { useEffect } from 'react'
 import { FrequentlyAskedQuestions } from '@/components/frequently-asked-questions'
 import { PageLayout } from '@/components/page-layout'
 import { PromptOptimizer } from '@/components/prompt-optimizer'
@@ -11,50 +11,34 @@ import { Button } from '@/components/ui/button'
 import { useFetch } from '@/hooks/useFetch'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { useTemplateStore } from '@/stores/useTemplateStore'
-import { api } from '@/utils'
+import { modelOptions, templateOptions } from '@/utils'
 
 export const Route = createFileRoute('/')({
   component: PromptMasterAI,
   context: () => {
     return {
       useAuthStore,
-      useTemplateStore,
     }
   },
   loader: async ({ context }) => {
-    const fetchTemplates = context.useTemplateStore.getState().fetch
-    const auth = context.useAuthStore.getState().data
-
-    const queryModel = context.queryClient.fetchQuery({
-      queryKey: ['fetch', 'models'],
-      queryFn: () => api<ModelEntries>('/api/v1/models/models', {
-        method: 'GET',
-      }),
-      staleTime: 300000,
-    })
-
-    const res = await Promise.allSettled([
-      queryModel,
-      fetchTemplates(auth
-        ? {
-          headers: {
-            Authorization: `Bearer ${auth?.access_token}`,
-          },
-        }
-        : undefined),
+    await Promise.all([
+      context.queryClient.ensureQueryData(modelOptions),
+      context.queryClient.ensureQueryData(templateOptions),
     ])
-
-    return {
-      models: res[0].status === 'fulfilled' ? res[0].value : [],
-      templates: res[1].status === 'fulfilled' ? res[1].value : [],
-    }
   },
 })
 
 function PromptMasterAI() {
-  const { models, templates } = Route.useLoaderData()
   const auth = useAuthStore(state => state.data)
   const { $fetch } = useFetch()
+  const setTemplates = useTemplateStore(state => state.update)
+
+  const models = useSuspenseQuery(modelOptions)
+  const templates = useSuspenseQuery(templateOptions)
+
+  useEffect(() => {
+    setTemplates(templates.data)
+  }, [models, templates.data, setTemplates])
 
   const optimizeMutation = useMutation({
     mutationKey: ['optimize'],
@@ -139,7 +123,7 @@ function PromptMasterAI() {
 
       <div className="space-y-8">
         {/* 優化工具區塊 */}
-        <PromptOptimizer templates={templates} models={models} isLoading={optimizeMutation.isPending} optimizedTemplate={optimizeMutation.data?.optimized_prompt} onSubmit={onSubmit} />
+        <PromptOptimizer templates={templates.data} models={models.data} isLoading={optimizeMutation.isPending} optimizedTemplate={optimizeMutation.data?.optimized_prompt} onSubmit={onSubmit} />
 
         {/* 常見問題區塊 */}
         <FrequentlyAskedQuestions />

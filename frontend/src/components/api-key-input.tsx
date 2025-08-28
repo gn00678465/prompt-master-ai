@@ -1,12 +1,10 @@
-import { useLiveQuery } from 'dexie-react-hooks'
 import { ChevronsUpDown } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/animate-ui/radix/collapsible'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { decryptText, encryptText } from '@/utils/crypto'
-import { db } from '@/utils/db'
+import { useAPIKeyStore } from '@/stores/useAPIKeyStore'
 
 interface ApiKeyInputProps {
   value?: string
@@ -15,23 +13,9 @@ interface ApiKeyInputProps {
 
 export function ApiKeyInput({ ref, value, onChange }: ApiKeyInputProps & { ref?: React.Ref<HTMLInputElement | null> }) {
   const [userInput, setUserInput] = useState<string | null>(null)
-
-  // 使用 useLiveQuery 來監聽資料庫變化並解密
-  const storedApiKey = useLiveQuery(async () => {
-    try {
-      const keys = await db.apiKeys.toArray()
-      if (keys.length > 0) {
-        // 解密儲存的密鑰
-        const decrypted = await decryptText(keys[0].key)
-        return decrypted
-      }
-      return ''
-    }
-    catch (error) {
-      console.error('讀取或解密 API 密鑰時發生錯誤：', error)
-      return ''
-    }
-  })
+  const storedApiKey = useAPIKeyStore(state => state.apiKey)
+  const setApiKey = useAPIKeyStore(state => state.set)
+  const clearApiKey = useAPIKeyStore(state => state.clear)
 
   // 計算當前顯示的值
   const currentValue = useMemo(() => {
@@ -61,21 +45,16 @@ export function ApiKeyInput({ ref, value, onChange }: ApiKeyInputProps & { ref?:
     try {
       // 如果是空字串，清空資料庫
       if (!currentValue.trim()) {
-        await db.apiKeys.clear()
+        // await db.apiKeys.clear()
+        clearApiKey()
         return
       }
 
-      // 加密 API 密鑰
-      const encryptedKey = await encryptText(currentValue.trim())
-
       // 清除舊的 API 密鑰
-      await db.apiKeys.clear()
+      clearApiKey()
 
       // 新增新的加密 API 密鑰
-      await db.apiKeys.add({
-        id: 1,
-        key: encryptedKey,
-      })
+      setApiKey(currentValue.trim())
 
       // 成功儲存，但不使用 console.log
     }

@@ -1,4 +1,3 @@
-// app/router.tsx
 import { QueryClient } from '@tanstack/react-query'
 import { createRouter as createTanStackRouter } from '@tanstack/react-router'
 import { routerWithQueryClient } from '@tanstack/react-router-with-query'
@@ -12,7 +11,12 @@ export function createRouter() {
   return routerWithQueryClient(
     createTanStackRouter({
       routeTree,
-      context: { queryClient },
+      context: {
+        queryClient,
+        env: {
+          API_URL: import.meta.env.VITE_API_URL || '',
+        },
+      },
       defaultPreload: 'intent',
       defaultErrorComponent: DefaultCatchBoundary,
       defaultNotFoundComponent: () => <NotFound />,
