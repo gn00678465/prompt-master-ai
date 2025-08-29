@@ -91,7 +91,7 @@ def get_token_header(
     return credentials.credentials
 
 
-def verify_current_user(
+async def verify_current_user(
     token: Annotated[str, Depends(get_token_header)],
     session: Annotated[Session, Depends(get_session)],
 ) -> User | None:
@@ -107,7 +107,7 @@ def verify_current_user(
 
         # 檢查 JTI 是否在黑名單中
         jti: str | None = payload.get("jti")
-        if jti and is_token_blacklisted(jti):
+        if jti and await is_token_blacklisted(jti):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Token 已失效"
             )
@@ -136,7 +136,7 @@ def get_optional_token_header(
     return credentials.credentials
 
 
-def verify_optional_current_user(
+async def verify_optional_current_user(
     token: Annotated[str | None, Depends(get_optional_token_header)],
     session: Annotated[Session, Depends(get_session)],
 ) -> User | None:
@@ -155,7 +155,7 @@ def verify_optional_current_user(
 
         # 檢查 JTI 是否在黑名單中
         jti: str | None = payload.get("jti")
-        if jti and is_token_blacklisted(jti):
+        if jti and await is_token_blacklisted(jti):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Token 已失效"
             )

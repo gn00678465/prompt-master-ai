@@ -1,5 +1,6 @@
+"""應用程式進入點"""
+
 from contextlib import asynccontextmanager
-import sys
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,38 +14,31 @@ from app.api import (
     template_router,
 )
 from app.dependencies import create_db_and_tables
-from app.utils import get_redis_client
-
-
-def check_redis_connection():
-    """
-    檢查 Redis 連接
-    Raises:
-        Exception: 如果無法連接到 Redis
-    """
-    try:
-        r = get_redis_client()
-        r.ping()
-        print("✅ Redis 連線成功")
-        r.close()  # 記得關閉連接
-    except ConnectionError as e:
-        print(f"❌ Redis 連線失敗 - 連接錯誤: {e}")
-        sys.exit(1)
-    except TimeoutError as e:
-        print(f"❌ Redis 連線失敗 - 超時: {e}")
-        sys.exit(1)
+from app.services.mcp_server import mcp_app
+from app.services.redis_client import Redis
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI):
+async def app_lifespan(_: FastAPI):
     """Create the database and tables"""
     create_db_and_tables()
-    check_redis_connection()
+    await Redis.check_connection()
+    # 關閉 Redis 連接
+    await Redis.close()
     yield
-    # Cleanup code can be added here if needed
 
 
-app = FastAPI(lifespan=lifespan)
+# Combine both lifespans
+@asynccontextmanager
+async def combined_lifespan(_: FastAPI):
+    """Run both lifespans"""
+    async with app_lifespan(_):
+        async with mcp_app.lifespan(_):
+            yield
+
+
+app = FastAPI(title="Prompt Master", lifespan=combined_lifespan)
+app.mount("/mcp", mcp_app)
 
 origins = [
     "http://localhost:3000",
