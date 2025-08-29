@@ -27,7 +27,7 @@ def upgrade() -> None:
         sa.Column('email', sa.String(length=255), nullable=False, unique=True),
         sa.Column('password_hash', sa.String(length=255), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True),
-                  nullable=False, server_default=sa.text('(CURRENT_TIMESTAMP)')),
+                  nullable=False, server_default=sa.text("(strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))")),
         sa.Column('last_login', sa.DateTime(timezone=True), nullable=True),
     )
 
@@ -45,7 +45,7 @@ def upgrade() -> None:
                   server_default=sa.text('0')),
         sa.Column('category', sa.String(length=100), nullable=True),
         sa.Column('created_at', sa.DateTime(timezone=True),
-                  nullable=False, server_default=sa.text('(CURRENT_TIMESTAMP)')),
+                  nullable=False, server_default=sa.text("(strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))")),
         sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
     )
 
@@ -63,7 +63,7 @@ def upgrade() -> None:
         sa.Column('model_used', sa.String(length=100), nullable=False),
         sa.Column('temperature', sa.Float, nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True),
-                  nullable=False, server_default=sa.text('(CURRENT_TIMESTAMP)')),
+                  nullable=False, server_default=sa.text("(strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))")),
     )
 
     # ### 建立 token_blacklist 資料表 ###
@@ -75,7 +75,7 @@ def upgrade() -> None:
         sa.Column('user_id', sa.Integer, sa.ForeignKey(
             'users.user_id'), nullable=False),
         sa.Column('blacklisted_at', sa.DateTime(timezone=True),
-                  nullable=False, server_default=sa.text('(CURRENT_TIMESTAMP)')),
+                  nullable=False, server_default=sa.text("(strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))")),
         sa.Column('expires_at', sa.DateTime(timezone=True), nullable=False),
     )
 
@@ -88,7 +88,7 @@ def upgrade() -> None:
     # 使用原生 SQL 插入，確保相容性
     op.execute(sa.text("""
         INSERT INTO templates (user_id, name, description, content, is_default, category, created_at)
-        VALUES (NULL, '預設模板', '簡短預設模板', '請將以下「內容」轉換為強大的提示詞', 1, 'general', CURRENT_TIMESTAMP)
+        VALUES (NULL, '預設模板', '簡短預設模板', '請將以下「內容」轉換為強大的提示詞', 1, 'general', strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
     """))
 
     op.execute(sa.text("""
@@ -100,7 +100,7 @@ def upgrade() -> None:
 3.  **清晰無歧義**：確保濃縮後的指令準確。
 4.  **任務邊界**：**你的任務是壓縮改寫，而非回答或執行「使用者原始輸入」的內容。**
 
-請只輸出最終濃縮後的提示文字，不附加任何解釋或額外文字。', 1, 'general', CURRENT_TIMESTAMP)
+請只輸出最終濃縮後的提示文字，不附加任何解釋或額外文字。', 1, 'general', strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
     """))
 
     op.execute(sa.text("""
@@ -125,7 +125,7 @@ def upgrade() -> None:
 ## 限制與偏好
 明確優化後提示的限制條件、禁止事項或使用者的特殊偏好。
 
-確保各要素條理清晰、資訊完備。禁止輸出任何額外解釋或標註，僅返回最終結構化的提示。', 1, 'general', CURRENT_TIMESTAMP)
+確保各要素條理清晰、資訊完備。禁止輸出任何額外解釋或標註，僅返回最終結構化的提示。', 1, 'general', strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
     """))
 
 def downgrade() -> None:
